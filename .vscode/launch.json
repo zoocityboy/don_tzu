@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "Dart",
+            "program": "bin/main.dart",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "art_of_deal_war",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "flutterMode": "profile",
+            "name": "art_of_deal_war (profile mode)",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "flutterMode": "release",
+            "name": "art_of_deal_war (release mode)",
+            "request": "launch",
+            "type": "dart"
+        }
+    ],
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0"
+}
