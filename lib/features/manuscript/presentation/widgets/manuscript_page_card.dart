@@ -35,6 +35,32 @@ class AgedEdgesWidget extends StatelessWidget {
   }
 }
 
+class CenterAuthorWidget extends StatelessWidget {
+  final Color color;
+
+  const CenterAuthorWidget({super.key, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('* * *', style: GoogleFonts.notoSerif(color: color, fontSize: 16)),
+        const SizedBox(height: 4),
+        Text(
+          'Don Tzu',
+          style: GoogleFonts.notoSerif(
+            fontSize: 18,
+            color: color,
+            height: 2.0,
+            letterSpacing: 0.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
 class CenteredQuoteWidget extends StatelessWidget {
   final String quote;
   final Color inkGray;
@@ -193,26 +219,16 @@ class ManuscriptPageCard extends StatelessWidget {
           CharacterImageWidget(page: page, isDark: isDark),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 64),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 spacing: 32,
                 children: [
-                  const SizedBox(height: 40),
                   CenteredTitleWidget(title: page.title, inkBlack: inkBlack),
                   CenteredQuoteWidget(quote: page.quote, inkGray: inkGray),
-                  Text(
-                    '     - Don Tzu',
-                    style: GoogleFonts.notoSerif(
-                      fontSize: 18,
-                      color: inkGray,
-                      height: 2.0,
-                      letterSpacing: 0.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  CenterAuthorWidget(color: inkGray),
                 ],
               ),
             ),
