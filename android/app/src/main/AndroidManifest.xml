@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="art_of_deal_war"
+        android:label="The Art of Deal War"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
