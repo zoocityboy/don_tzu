@@ -198,12 +198,21 @@ class ManuscriptPageCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
+                spacing: 32,
                 children: [
                   const SizedBox(height: 40),
                   CenteredTitleWidget(title: page.title, inkBlack: inkBlack),
-                  const SizedBox(height: 32),
                   CenteredQuoteWidget(quote: page.quote, inkGray: inkGray),
-                  const SizedBox(height: 120),
+                  Text(
+                    '     - Don Tzu',
+                    style: GoogleFonts.notoSerif(
+                      fontSize: 18,
+                      color: inkGray,
+                      height: 2.0,
+                      letterSpacing: 0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ),
