@@ -8,7 +8,12 @@ abstract class ManuscriptEvent extends Equatable {
 }
 
 class LoadManuscriptPages extends ManuscriptEvent {
-  const LoadManuscriptPages();
+  final String? language;
+
+  const LoadManuscriptPages({this.language});
+
+  @override
+  List<Object?> get props => [language];
 }
 
 class ToggleLike extends ManuscriptEvent {

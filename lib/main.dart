@@ -1,3 +1,4 @@
+import 'package:art_of_deal_war/features/manuscript/l10n/generated/manuscript_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -55,8 +56,9 @@ class ArtOfDealWarApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeMode,
             routerConfig: appRouter,
-            localizationsDelegates: const [
+            localizationsDelegates: [
               AppLocalizations.delegate,
+              ManuscriptLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,

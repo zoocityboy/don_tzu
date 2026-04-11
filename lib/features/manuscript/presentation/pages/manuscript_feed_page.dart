@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,64 +30,38 @@ class ActionBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? AppColors.darkPaperAged : AppColors.paperAged;
     final textColor = isDark ? AppColors.darkInkLight : AppColors.inkLight;
 
-    return Container(
-      clipBehavior: Clip.hardEdge,
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: surfaceColor.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.agedBrown.withValues(alpha: 0.9),
-          width: 1,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _VerticalActionButton(
+          icon: page.isLiked ? Icons.favorite : Icons.favorite_border,
+          label: page.isLiked ? 'Liked' : 'Like',
+          color: page.isLiked ? AppColors.vermillion : textColor,
+          onTap: onLike,
         ),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ActionButtonWidget(
-              icon: page.isLiked ? Icons.favorite : Icons.favorite_border,
-              label: page.isLiked ? 'Liked' : 'Like',
-              color: page.isLiked ? AppColors.vermillion : textColor,
-              onTap: onLike,
-            ),
-            Container(
-              height: 30,
-              width: 1,
-              color: AppColors.inkLight.withValues(alpha: 0.1),
-            ),
-            ActionButtonWidget(
-              icon: Icons.share_outlined,
-              label: 'Share',
-              color: textColor,
-              onTap: onShare,
-            ),
-            Container(
-              height: 30,
-              width: 1,
-              color: AppColors.inkLight.withValues(alpha: 0.1),
-            ),
-            const SealStampWidget(),
-          ],
+        const SizedBox(height: 16),
+        _VerticalActionButton(
+          icon: Icons.share_outlined,
+          label: 'Share',
+          color: textColor,
+          onTap: onShare,
         ),
-      ),
+        const SizedBox(height: 16),
+        const _SealStampButton(),
+      ],
     );
   }
 }
 
-class ActionButtonWidget extends StatelessWidget {
+class _VerticalActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback onTap;
 
-  const ActionButtonWidget({
-    super.key,
+  const _VerticalActionButton({
     required this.icon,
     required this.label,
     required this.color,
@@ -103,17 +75,68 @@ class ActionButtonWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 24),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
           const SizedBox(height: 4),
           Text(
             label,
             style: GoogleFonts.notoSansJp(
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w600,
+              fontSize: 11,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              shadows: [
+                Shadow(
+                  blurRadius: 2,
+                  color: Colors.black.withValues(alpha: 0.5),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SealStampButton extends StatelessWidget {
+  const _SealStampButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: () async {
+        HapticFeedback.heavyImpact();
+        final cacheCleared = clearCache();
+        await cacheCleared;
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cache cleared!', style: GoogleFonts.notoSansJp()),
+              backgroundColor: AppColors.vermillion,
+            ),
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.vermillion, width: 2),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          '戰',
+          style: GoogleFonts.notoSerifJp(
+            fontSize: 24,
+            color: AppColors.vermillion,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }
@@ -161,8 +184,21 @@ class CenteredLayout extends StatelessWidget {
                 );
               },
             ),
+            // Right-side action buttons (TikTok style)
             Positioned(
-              bottom: 140,
+              right: 16,
+              bottom: 100,
+              child: SafeArea(
+                child: ActionBarWidget(
+                  page: pages[currentPage],
+                  onLike: () => onLike(pages[currentPage].id),
+                  onShare: () => onShare(pages[currentPage]),
+                ),
+              ),
+            ),
+            // Page indicator at top of screen
+            Positioned(
+              top: 60,
               left: 0,
               right: 0,
               child: SafeArea(
@@ -172,6 +208,7 @@ class CenteredLayout extends StatelessWidget {
                 ),
               ),
             ),
+            // Top-right controls
             Positioned(
               top: 0,
               right: 16,
@@ -183,18 +220,6 @@ class CenteredLayout extends StatelessWidget {
                     const SizedBox(width: 8),
                     const ThemeToggleButton(),
                   ],
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: constraints.maxHeight * 0.04,
-              child: SafeArea(
-                child: ActionBarWidget(
-                  page: pages[currentPage],
-                  onLike: () => onLike(pages[currentPage].id),
-                  onShare: () => onShare(pages[currentPage]),
                 ),
               ),
             ),
@@ -496,7 +521,6 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
   @override
   void initState() {
     super.initState();
-    _ttsService.init();
     context.read<ManuscriptBloc>().add(const LoadManuscriptPages());
   }
 
@@ -532,7 +556,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
     final state = context.read<ManuscriptBloc>().state;
     if (state is ManuscriptLoaded && index < state.pages.length) {
       final page = state.pages[index];
-      _ttsService.speak('${page.title}. ${page.quote}');
+      _ttsService.playChapter(page.id);
     }
   }
 

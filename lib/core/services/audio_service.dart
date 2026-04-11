@@ -6,13 +6,15 @@ class AudioService {
   factory AudioService() => _instance;
   AudioService._internal();
 
-  final AudioPlayer _player = AudioPlayer();
-  bool _isMuted = false;
+  final AudioPlayer _player = AudioPlayer(playerId: 'background_music');
+  final AudioPlayer _ttsPlayer = AudioPlayer(playerId: 'tts_player')
+    ..setReleaseMode(ReleaseMode.stop)
+    ..setPlayerMode(PlayerMode.mediaPlayer)
+    ..setVolume(1);
 
-  bool get isMuted => _isMuted;
+  bool get isMuted => _player.volume == 0;
 
   Future<void> playBackgroundMusic() async {
-    if (_isMuted) return;
     try {
       await _player.setReleaseMode(ReleaseMode.loop);
       await _player.setVolume(0.2);
@@ -28,17 +30,18 @@ class AudioService {
   }
 
   Future<void> resume() async {
-    if (!_isMuted) {
+    if (!isMuted) {
       await _player.resume();
     }
   }
 
   void toggleMute() {
-    _isMuted = !_isMuted;
-    if (_isMuted) {
-      _player.pause();
-    } else {
+    if (isMuted) {
+      _player.setVolume(0.2);
       _player.resume();
+    } else {
+      _player.setVolume(0);
+      _player.pause();
     }
   }
 

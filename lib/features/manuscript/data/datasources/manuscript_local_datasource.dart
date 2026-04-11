@@ -1,169 +1,240 @@
 import 'package:art_of_deal_war/features/manuscript/data/models/manuscript_page_model.dart';
+import 'package:art_of_deal_war/features/manuscript/l10n/generated/manuscript_localizations.dart';
 
 abstract class ManuscriptLocalDataSource {
   Future<Set<String>> getLikedPageIds();
-  Future<List<ManuscriptPageModel>> getManuscriptPages();
+  Future<List<ManuscriptPageModel>> getManuscriptPages(
+    ManuscriptLocalizations l10n,
+  );
+  List<MapEntry<String, String>> getChaptersForTts(
+    ManuscriptLocalizations l10n,
+  );
   Future<void> saveLikedPageIds(Set<String> ids);
 }
 
 class ManuscriptLocalDataSourceImpl implements ManuscriptLocalDataSource {
-  // Sample satirical manuscript content - new quotes
-  static final List<ManuscriptPageModel> _samplePages = [
-    ManuscriptPageModel(
-      id: '1',
-      title: 'Chapter I - Total Victory',
-      quote:
-          'The goal is total victory, and we are going to win so much you will get tired of winning. Many people are saying it.',
-      imageAsset: 'assets/images/1.webp',
-    ),
-    ManuscriptPageModel(
-      id: '2',
-      title: 'Chapter II - Know Your Enemy',
-      quote:
-          'Always know your enemy, especially the fake news media, for they are unfair to a tremendous degree.',
-      imageAsset: 'assets/images/2.webp',
-    ),
-    ManuscriptPageModel(
-      id: '3',
-      title: 'Chapter III - Strong Commander',
-      quote:
-          'A wise commander keeps his troops strong with the best equipment and the highest pay, maybe ever.',
-      imageAsset: 'assets/images/3.webp',
-    ),
-    ManuscriptPageModel(
-      id: '4',
-      title: 'Chapter IV - The Wall',
-      quote:
-          'Build a wall. A tremendously hugest wall. It keeps the bad hombres out and makes the neighbor pay for it.',
-      imageAsset: 'assets/images/4.webp',
-    ),
-    ManuscriptPageModel(
-      id: '5',
-      title: 'Chapter V - Stable General',
-      quote:
-          'The stable general has a very good brain, maybe the best brain in the entire army, believe me.',
-      imageAsset: 'assets/images/5.webp',
-    ),
-    ManuscriptPageModel(
-      id: '6',
-      title: 'Chapter VI - Greatest Deal',
-      quote:
-          'When you make a deal, make the greatest deal in history. Otherwise, you are a loser, and no one likes a loser.',
-      imageAsset: 'assets/images/6.webp',
-    ),
-    ManuscriptPageModel(
-      id: '7',
-      title: 'Chapter VII - Ignore Haters',
-      quote:
-          'Criticism is the food of haters. Pay no attention to them. They are just total disasters.',
-      imageAsset: 'assets/images/7.webp',
-    ),
-    ManuscriptPageModel(
-      id: '8',
-      title: 'Chapter VIII - Counter-Punch',
-      quote:
-          'If attacked on social media, use your words—the best, most tremendous words—to counter-punch with overwhelming force at 3 AM.',
-      imageAsset: 'assets/images/8.webp',
-    ),
-    ManuscriptPageModel(
-      id: '9',
-      title: 'Chapter IX - Overwhelming Strength',
-      quote:
-          'To avoid war, be so strong that nobody would even dream of attacking you. We are talking about overwhelming, unbelievable strength.',
-      imageAsset: 'assets/images/9.webp',
-    ),
-    ManuscriptPageModel(
-      id: '10',
-      title: 'Chapter X - Foreign Commanders',
-      quote:
-          'Do not trust the foreign commanders, for they are killing us on trade and stealing our jobs. They are not nice people.',
-      imageAsset: 'assets/images/10.webp',
-    ),
-    ManuscriptPageModel(
-      id: '11',
-      title: 'Chapter XI - Draw a Crowd',
-      quote:
-          'A true leader knows how to draw a crowd, and a bigger crowd is always a sign of a better commander, period.',
-      imageAsset: 'assets/images/11.webp',
-    ),
-    ManuscriptPageModel(
-      id: '12',
-      title: 'Chapter XII - Fake Terrain',
-      quote:
-          'If the ground is not to your liking, declare it fake terrain and claim you meant to be somewhere else.',
-      imageAsset: 'assets/images/12.webp',
-    ),
-    ManuscriptPageModel(
-      id: '13',
-      title: 'Chapter XIII - Greatest Idea',
-      quote:
-          'When you have an idea, ensure everyone knows it is your idea, because it is the single greatest idea anyone has ever had.',
-      imageAsset: 'assets/images/13.webp',
-    ),
-    ManuscriptPageModel(
-      id: '14',
-      title: 'Chapter XIV - Save Strength',
-      quote:
-          'Avoid small, unnecessary skirmishes. Save your strength for the big rallies and the huge deals.',
-      imageAsset: 'assets/images/14.webp',
-    ),
-    ManuscriptPageModel(
-      id: '15',
-      title: 'Chapter XV - Powerful Handshake',
-      quote:
-          'When diplomats fail, use a powerful, tremendous handshake to show them who is the strongest, believe me.',
-      imageAsset: 'assets/images/15.webp',
-    ),
-    ManuscriptPageModel(
-      id: '16',
-      title: 'Chapter XVI - Fine People',
-      quote:
-          'In times of conflict, remember that there are very fine people on both sides, as long as one side is not the fake news media.',
-      imageAsset: 'assets/images/16.webp',
-    ),
-    ManuscriptPageModel(
-      id: '17',
-      title: 'Chapter XVII - Drain the Swamp',
-      quote:
-          'When a general is corrupt, you must drain the swamp, because nobody has drained swamps better than me.',
-      imageAsset: 'assets/images/17.webp',
-    ),
-    ManuscriptPageModel(
-      id: '18',
-      title: 'Chapter XVIII - Ignore Rules',
-      quote:
-          'Sometimes, strategy means admitting that the rules are unfair and just ignoring them to win. This is common sense.',
-      imageAsset: 'assets/images/18.webp',
-    ),
-    ManuscriptPageModel(
-      id: '19',
-      title: 'Chapter XIX - Great Brand',
-      quote:
-          'A truly great commander is a brand, a tremendous, very strong, very powerful brand.',
-      imageAsset: 'assets/images/19.webp',
-    ),
-    ManuscriptPageModel(
-      id: '20',
-      title: 'Chapter XX - Stable Genius',
-      quote:
-          'Do not question the wise leader\'s intelligence, because he is a very stable genius.',
-      imageAsset: 'assets/images/20.webp',
-    ),
-  ];
-
   @override
   Future<Set<String>> getLikedPageIds() async {
     return {};
   }
 
   @override
-  Future<List<ManuscriptPageModel>> getManuscriptPages() async {
+  Future<List<ManuscriptPageModel>> getManuscriptPages(
+    ManuscriptLocalizations l10n,
+  ) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    return _samplePages;
+    return [
+      ManuscriptPageModel(
+        id: '1',
+        title: l10n.manuscriptChapter1Title,
+        quote: l10n.manuscriptChapter1Quote,
+        imageAsset: 'assets/images/1.webp',
+      ),
+      ManuscriptPageModel(
+        id: '2',
+        title: l10n.manuscriptChapter2Title,
+        quote: l10n.manuscriptChapter2Quote,
+        imageAsset: 'assets/images/2.webp',
+      ),
+      ManuscriptPageModel(
+        id: '3',
+        title: l10n.manuscriptChapter3Title,
+        quote: l10n.manuscriptChapter3Quote,
+        imageAsset: 'assets/images/3.webp',
+      ),
+      ManuscriptPageModel(
+        id: '4',
+        title: l10n.manuscriptChapter4Title,
+        quote: l10n.manuscriptChapter4Quote,
+        imageAsset: 'assets/images/4.webp',
+      ),
+      ManuscriptPageModel(
+        id: '5',
+        title: l10n.manuscriptChapter5Title,
+        quote: l10n.manuscriptChapter5Quote,
+        imageAsset: 'assets/images/5.webp',
+      ),
+      ManuscriptPageModel(
+        id: '6',
+        title: l10n.manuscriptChapter6Title,
+        quote: l10n.manuscriptChapter6Quote,
+        imageAsset: 'assets/images/6.webp',
+      ),
+      ManuscriptPageModel(
+        id: '7',
+        title: l10n.manuscriptChapter7Title,
+        quote: l10n.manuscriptChapter7Quote,
+        imageAsset: 'assets/images/7.webp',
+      ),
+      ManuscriptPageModel(
+        id: '8',
+        title: l10n.manuscriptChapter8Title,
+        quote: l10n.manuscriptChapter8Quote,
+        imageAsset: 'assets/images/8.webp',
+      ),
+      ManuscriptPageModel(
+        id: '9',
+        title: l10n.manuscriptChapter9Title,
+        quote: l10n.manuscriptChapter9Quote,
+        imageAsset: 'assets/images/9.webp',
+      ),
+      ManuscriptPageModel(
+        id: '10',
+        title: l10n.manuscriptChapter10Title,
+        quote: l10n.manuscriptChapter10Quote,
+        imageAsset: 'assets/images/10.webp',
+      ),
+      ManuscriptPageModel(
+        id: '11',
+        title: l10n.manuscriptChapter11Title,
+        quote: l10n.manuscriptChapter11Quote,
+        imageAsset: 'assets/images/11.webp',
+      ),
+      ManuscriptPageModel(
+        id: '12',
+        title: l10n.manuscriptChapter12Title,
+        quote: l10n.manuscriptChapter12Quote,
+        imageAsset: 'assets/images/12.webp',
+      ),
+      ManuscriptPageModel(
+        id: '13',
+        title: l10n.manuscriptChapter13Title,
+        quote: l10n.manuscriptChapter13Quote,
+        imageAsset: 'assets/images/13.webp',
+      ),
+      ManuscriptPageModel(
+        id: '14',
+        title: l10n.manuscriptChapter14Title,
+        quote: l10n.manuscriptChapter14Quote,
+        imageAsset: 'assets/images/14.webp',
+      ),
+      ManuscriptPageModel(
+        id: '15',
+        title: l10n.manuscriptChapter15Title,
+        quote: l10n.manuscriptChapter15Quote,
+        imageAsset: 'assets/images/15.webp',
+      ),
+      ManuscriptPageModel(
+        id: '16',
+        title: l10n.manuscriptChapter16Title,
+        quote: l10n.manuscriptChapter16Quote,
+        imageAsset: 'assets/images/16.webp',
+      ),
+      ManuscriptPageModel(
+        id: '17',
+        title: l10n.manuscriptChapter17Title,
+        quote: l10n.manuscriptChapter17Quote,
+        imageAsset: 'assets/images/17.webp',
+      ),
+      ManuscriptPageModel(
+        id: '18',
+        title: l10n.manuscriptChapter18Title,
+        quote: l10n.manuscriptChapter18Quote,
+        imageAsset: 'assets/images/18.webp',
+      ),
+      ManuscriptPageModel(
+        id: '19',
+        title: l10n.manuscriptChapter19Title,
+        quote: l10n.manuscriptChapter19Quote,
+        imageAsset: 'assets/images/19.webp',
+      ),
+      ManuscriptPageModel(
+        id: '20',
+        title: l10n.manuscriptChapter20Title,
+        quote: l10n.manuscriptChapter20Quote,
+        imageAsset: 'assets/images/20.webp',
+      ),
+    ];
   }
 
   @override
-  Future<void> saveLikedPageIds(Set<String> ids) async {
-    // No-op for now
+  Future<void> saveLikedPageIds(Set<String> ids) async {}
+
+  @override
+  List<MapEntry<String, String>> getChaptersForTts(
+    ManuscriptLocalizations l10n,
+  ) {
+    return [
+      MapEntry(
+        '1',
+        l10n.manuscriptChapter1Quote,
+      ),
+      MapEntry(
+        '2',
+        l10n.manuscriptChapter2Quote,
+      ),
+      MapEntry(
+        '3',
+        l10n.manuscriptChapter3Quote,
+      ),
+      MapEntry(
+        '4',
+        l10n.manuscriptChapter4Quote,
+      ),
+      MapEntry(
+        '5',
+        l10n.manuscriptChapter5Quote,
+      ),
+      MapEntry(
+        '6',
+        l10n.manuscriptChapter6Quote,
+      ),
+      MapEntry(
+        '7',
+        l10n.manuscriptChapter7Quote,
+      ),
+      MapEntry(
+        '8',
+        l10n.manuscriptChapter8Quote,
+      ),
+      MapEntry(
+        '9',
+        l10n.manuscriptChapter9Quote,
+      ),
+      MapEntry(
+        '10',
+        l10n.manuscriptChapter10Quote,
+      ),
+      MapEntry(
+        '11',
+        l10n.manuscriptChapter11Quote,
+      ),
+      MapEntry(
+        '12',
+        l10n.manuscriptChapter12Quote,
+      ),
+      MapEntry(
+        '13',
+        l10n.manuscriptChapter13Quote,
+      ),
+      MapEntry(
+        '14',
+        l10n.manuscriptChapter14Quote,
+      ),
+      MapEntry(
+        '15',
+        l10n.manuscriptChapter15Quote,
+      ),
+      MapEntry(
+        '16',
+        l10n.manuscriptChapter16Quote,
+      ),
+      MapEntry(
+        '17',
+        l10n.manuscriptChapter17Quote,
+      ),
+      MapEntry(
+        '18',
+        l10n.manuscriptChapter18Quote,
+      ),
+      MapEntry(
+        '19',
+        l10n.manuscriptChapter19Quote,
+      ),
+      MapEntry(
+        '20',
+        l10n.manuscriptChapter20Quote,
+      ),
+    ];
   }
 }

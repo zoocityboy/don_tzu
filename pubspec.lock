@@ -257,6 +257,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.7"
+  edge_tts:
+    dependency: "direct main"
+    description:
+      name: edge_tts
+      sha256: "25a465503f24a6df30fdf205f6fa619fa6bcb8036737da15d4f0bf1e776bec32"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.4"
   equatable:
     dependency: "direct main"
     description:
@@ -326,14 +334,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.0"
-  flutter_lints:
-    dependency: "direct dev"
-    description:
-      name: flutter_lints
-      sha256: "3105dc8492f6183fb076ccf1f351ac3d60564bff92e20bfc4af9cc1651f4e7e1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.0"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -352,14 +352,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_tts:
-    dependency: "direct main"
-    description:
-      name: flutter_tts
-      sha256: ce5eb209b40e95f2f4a1397116c87ab2fcdff32257d04ed7a764e75894c03775
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.5"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -541,14 +533,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  lints:
-    dependency: transitive
-    description:
-      name: lints
-      sha256: "12f842a479589fea194fe5c5a3095abc7be0c1f2ddfa9a0e76aed1dbd26a87df"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.1.0"
   logging:
     dependency: transitive
     description:
