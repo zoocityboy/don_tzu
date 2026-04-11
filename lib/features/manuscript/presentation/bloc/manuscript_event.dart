@@ -19,18 +19,3 @@ class ToggleLike extends ManuscriptEvent {
   @override
   List<Object?> get props => [pageId];
 }
-
-class SharePage extends ManuscriptEvent {
-  final String pageId;
-  final String title;
-  final String quote;
-
-  const SharePage({
-    required this.pageId,
-    required this.title,
-    required this.quote,
-  });
-
-  @override
-  List<Object?> get props => [pageId, title, quote];
-}

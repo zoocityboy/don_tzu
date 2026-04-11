@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
@@ -176,7 +177,7 @@ class _AnimatedTextContentWidgetState extends State<AnimatedTextContentWidget>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _fadeAnimation = Tween<double>(
-      begin: 0,
+      begin: 0.3,
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     if (widget.animate) {
@@ -224,11 +225,29 @@ class _AnimatedTextContentWidgetState extends State<AnimatedTextContentWidget>
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         spacing: 32,
-        children: [
-          CenteredTitleWidget(title: widget.title, inkBlack: widget.inkBlack),
-          CenteredQuoteWidget(quote: widget.quote, inkGray: widget.inkGray),
-          CenterAuthorWidget(color: widget.inkGray),
-        ],
+        children: AnimateList(
+          interval: 100.ms,
+          delay: 100.ms,
+          effects: [
+            FadeEffect(
+              duration: 300.ms,
+              begin: .015,
+              end: 1,
+              curve: Curves.easeInOutCubicEmphasized,
+            ),
+            SlideEffect(
+              begin: const Offset(0, 0.2),
+              end: Offset.zero,
+              duration: 300.ms,
+              curve: Curves.easeInOutCubicEmphasized,
+            ),
+          ],
+          children: [
+            CenteredTitleWidget(title: widget.title, inkBlack: widget.inkBlack),
+            CenteredQuoteWidget(quote: widget.quote, inkGray: widget.inkGray),
+            CenterAuthorWidget(color: widget.inkGray),
+          ],
+        ),
       ),
     );
   }
