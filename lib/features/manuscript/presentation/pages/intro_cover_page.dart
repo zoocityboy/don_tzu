@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:art_of_deal_war/core/services/audio_service.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/manuscript_page_card.dart';
 
@@ -19,6 +20,7 @@ class IntroCoverPage extends StatefulWidget {
 
 class _IntroCoverPageState extends State<IntroCoverPage> {
   bool _showContent = false;
+  final AudioService _audioService = AudioService();
 
   @override
   void initState() {
@@ -26,6 +28,12 @@ class _IntroCoverPageState extends State<IntroCoverPage> {
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _showContent = true);
     });
+  }
+
+  void _handleEnter() {
+    HapticFeedback.mediumImpact();
+    _audioService.playBackgroundMusic();
+    widget.onEnter();
   }
 
   @override
@@ -161,10 +169,7 @@ class _IntroCoverPageState extends State<IntroCoverPage> {
                     opacity: _showContent ? 1.0 : 0.0,
                     duration: kIntroAnimationDuration,
                     child: GestureDetector(
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        widget.onEnter();
-                      },
+                      onTap: _handleEnter,
                       child:
                           Container(
                                 padding: const EdgeInsets.symmetric(

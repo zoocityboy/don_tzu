@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:art_of_deal_war/core/services/tts_service.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
@@ -14,6 +15,7 @@ import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_state.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/manuscript_page_card.dart';
 import 'package:art_of_deal_war/main.dart' show clearCache;
+import 'package:art_of_deal_war/injection_container.dart' as di;
 
 class ActionBarWidget extends StatelessWidget {
   final ManuscriptPage page;
@@ -124,6 +126,7 @@ class CenteredLayout extends StatelessWidget {
   final void Function(int) onPageChanged;
   final void Function(String) onLike;
   final void Function(ManuscriptPage) onShare;
+  final TtsService ttsService;
 
   const CenteredLayout({
     super.key,
@@ -133,6 +136,7 @@ class CenteredLayout extends StatelessWidget {
     required this.onPageChanged,
     required this.onLike,
     required this.onShare,
+    required this.ttsService,
   });
 
   @override
@@ -171,7 +175,16 @@ class CenteredLayout extends StatelessWidget {
             Positioned(
               top: 0,
               right: 16,
-              child: SafeArea(child: const ThemeToggleButton()),
+              child: SafeArea(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TtsMuteButton(ttsService: ttsService),
+                    const SizedBox(width: 8),
+                    const ThemeToggleButton(),
+                  ],
+                ),
+              ),
             ),
             Positioned(
               left: 0,
@@ -417,8 +430,49 @@ class ThemeToggleButton extends StatelessWidget {
   }
 }
 
+class TtsMuteButton extends StatelessWidget {
+  final TtsService ttsService;
+
+  const TtsMuteButton({super.key, required this.ttsService});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            ttsService.toggleMute();
+            setState(() {});
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: (isDark ? AppColors.darkPaperAged : AppColors.paperAged)
+                  .withValues(alpha: 0.8),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.inkLight.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              ttsService.isMuted ? Icons.volume_off : Icons.volume_up,
+              color: isDark ? AppColors.darkInkLight : AppColors.inkLight,
+              size: 20,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
   final PageController _pageController = PageController();
+  final TtsService _ttsService = di.getIt<TtsService>();
   int _currentPage = 0;
 
   @override
@@ -434,6 +488,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
 
   @override
   void dispose() {
+    _ttsService.stop();
     _pageController.dispose();
     super.dispose();
   }
@@ -441,6 +496,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
   @override
   void initState() {
     super.initState();
+    _ttsService.init();
     context.read<ManuscriptBloc>().add(const LoadManuscriptPages());
   }
 
@@ -457,6 +513,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
         onPageChanged: _onPageChanged,
         onLike: _onLike,
         onShare: _sharePage,
+        ttsService: _ttsService,
       ),
       _ => const LoadingWidget(),
     };
@@ -468,7 +525,15 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
   }
 
   void _onPageChanged(int index) {
+    if (index != _currentPage) {
+      _ttsService.stop();
+    }
     setState(() => _currentPage = index);
+    final state = context.read<ManuscriptBloc>().state;
+    if (state is ManuscriptLoaded && index < state.pages.length) {
+      final page = state.pages[index];
+      _ttsService.speak('${page.title}. ${page.quote}');
+    }
   }
 
   Future<void> _sharePage(ManuscriptPage page) async {

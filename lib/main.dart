@@ -3,11 +3,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:art_of_deal_war/core/router/app_router.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
 import 'package:art_of_deal_war/injection_container.dart' as di;
+import 'package:art_of_deal_war/l10n/generated/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +55,20 @@ class ArtOfDealWarApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeMode,
             routerConfig: appRouter,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('cs'),
+              Locale('de'),
+              Locale('hu'),
+              Locale('pl'),
+              Locale('sk'),
+            ],
             scrollBehavior:
                 [
                   TargetPlatform.windows,
