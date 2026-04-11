@@ -253,46 +253,6 @@ class PageContentWidget extends StatefulWidget {
 }
 
 class _PageContentWidgetState extends State<PageContentWidget> {
-  bool _animateText = false;
-  bool _animateImage = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.shouldAnimate) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {
-            _animateText = true;
-            _animateImage = true;
-          });
-        }
-      });
-    } else {
-      _animateText = true;
-      _animateImage = true;
-    }
-  }
-
-  @override
-  void didUpdateWidget(PageContentWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.shouldAnimate && !oldWidget.shouldAnimate) {
-      setState(() {
-        _animateText = false;
-        _animateImage = false;
-      });
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {
-            _animateText = true;
-            _animateImage = true;
-          });
-        }
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -316,7 +276,6 @@ class _PageContentWidgetState extends State<PageContentWidget> {
             AnimatedCharacterImageWidget(
               page: widget.page,
               isDark: isDark,
-              animate: _animateImage,
             ),
             SafeArea(
               child: AnimatedTextContentWidget(
@@ -325,7 +284,6 @@ class _PageContentWidgetState extends State<PageContentWidget> {
                 inkBlack: inkBlack,
                 inkGray: inkGray,
                 isDark: isDark,
-                animate: _animateText,
               ),
             ),
           ],

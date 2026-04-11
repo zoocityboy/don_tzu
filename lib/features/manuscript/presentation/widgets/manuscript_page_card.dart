@@ -78,10 +78,6 @@ class CenteredQuoteWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      // decoration: BoxDecoration(
-      //   border: Border.all(color: inkGray.withValues(alpha: 0.15), width: 1),
-      //   borderRadius: BorderRadius.circular(8),
-      // ),
       child: Text(
         quote,
         style: GoogleFonts.notoSerif(
@@ -136,246 +132,71 @@ class CenteredTitleWidget extends StatelessWidget {
   }
 }
 
-class AnimatedTextContentWidget extends StatefulWidget {
-  final String title;
-  final String quote;
-  final Color inkBlack;
-  final Color inkGray;
-  final bool isDark;
-  final bool animate;
-
-  const AnimatedTextContentWidget({
-    super.key,
-    required this.title,
-    required this.quote,
-    required this.inkBlack,
-    required this.inkGray,
-    required this.isDark,
-    this.animate = true,
-  });
-
-  @override
-  State<AnimatedTextContentWidget> createState() =>
-      _AnimatedTextContentWidgetState();
-}
-
-class _AnimatedTextContentWidgetState extends State<AnimatedTextContentWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: kAnimationDuration,
-      vsync: this,
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    _fadeAnimation = Tween<double>(
-      begin: 0.3,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    if (widget.animate) {
-      _controller.forward();
-    } else {
-      _controller.value = 1;
-    }
-  }
-
-  @override
-  void didUpdateWidget(AnimatedTextContentWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.animate && !oldWidget.animate) {
-      _controller.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return FractionalTranslation(
-          translation: _slideAnimation.value,
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: _buildContent(),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildContent() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        spacing: 32,
-        children: AnimateList(
-          interval: 100.ms,
-          delay: 100.ms,
-          effects: [
-            FadeEffect(
-              duration: 300.ms,
-              begin: .015,
-              end: 1,
-              curve: Curves.easeInOutCubicEmphasized,
-            ),
-            SlideEffect(
-              begin: const Offset(0, 0.2),
-              end: Offset.zero,
-              duration: 300.ms,
-              curve: Curves.easeInOutCubicEmphasized,
-            ),
-          ],
-          children: [
-            CenteredTitleWidget(title: widget.title, inkBlack: widget.inkBlack),
-            CenteredQuoteWidget(quote: widget.quote, inkGray: widget.inkGray),
-            CenterAuthorWidget(color: widget.inkGray),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AnimatedCharacterImageWidget extends StatefulWidget {
+class AnimatedCharacterImageWidget extends StatelessWidget {
   final ManuscriptPage page;
   final bool isDark;
-  final bool animate;
 
   const AnimatedCharacterImageWidget({
     super.key,
     required this.page,
     required this.isDark,
-    this.animate = true,
   });
 
   @override
-  State<AnimatedCharacterImageWidget> createState() =>
-      _AnimatedCharacterImageWidgetState();
-}
-
-class _AnimatedCharacterImageWidgetState
-    extends State<AnimatedCharacterImageWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: kAnimationDuration,
-      vsync: this,
-    );
-    _rotationAnimation = Tween<double>(
-      begin: 0.025,
-      end: 0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    _scaleAnimation = Tween<double>(
-      begin: 1.2,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    if (widget.animate) {
-      _controller.forward();
-    } else {
-      _controller.value = 1;
-    }
-  }
-
-  @override
-  void didUpdateWidget(AnimatedCharacterImageWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.animate && !oldWidget.animate) {
-      _controller.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.page.imageAsset.isEmpty) {
+    if (page.imageAsset.isEmpty) {
       return const SizedBox.shrink();
     }
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: RotationTransition(
-            turns: _rotationAnimation,
-            child: _buildImage(context),
-          ),
-        );
-      },
-    );
-  }
 
-  Widget _buildImage(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) {
-        return Center(
-          child: ColorFiltered(
-            colorFilter: ColorFilter.matrix(<double>[
-              0.9,
-              0.1,
-              0.1,
-              0,
-              widget.isDark ? 20 : 50,
-              0.1,
-              0.7,
-              0.1,
-              0,
-              widget.isDark ? 10 : 30,
-              0.1,
-              0.1,
-              0.6,
-              0,
-              widget.isDark ? 5 : 20,
-              0,
-              0,
-              0,
-              1,
-              0,
-            ]),
-            child: Opacity(
-              opacity: widget.isDark ? 0.08 : 0.25,
+          builder: (context, constraints) {
+            return ColorFiltered(
+              colorFilter: ColorFilter.matrix(<double>[
+                0.9,
+                0.1,
+                0.1,
+                0,
+                isDark ? 20 : 50,
+                0.1,
+                0.7,
+                0.1,
+                0,
+                isDark ? 10 : 30,
+                0.1,
+                0.1,
+                0.6,
+                0,
+                isDark ? 5 : 20,
+                0,
+                0,
+                0,
+                1,
+                0,
+              ]),
               child: Image.asset(
-                widget.page.imageAsset,
+                page.imageAsset,
                 fit: BoxFit.cover,
                 height: constraints.maxHeight,
-                cacheHeight:
-                    constraints.maxHeight.toInt() *
-                    MediaQuery.of(context).devicePixelRatio.toInt(),
+                opacity: AlwaysStoppedAnimation(isDark ? 0.08 : 0.25),
                 errorBuilder: (context, error, stack) =>
                     const SizedBox.shrink(),
               ),
-            ),
-          ),
+            );
+          },
+        )
+        .animate()
+        .scale(
+          begin: const Offset(1.2, 1.2),
+          end: const Offset(1, 1),
+          duration: kAnimationDuration,
+          curve: Curves.easeOutCubic,
+        )
+        .rotate(
+          begin: 0.015,
+          end: 0,
+          duration: kAnimationDuration,
+          curve: Curves.easeOutCubic,
         );
-      },
-    );
   }
 }
 
@@ -396,40 +217,35 @@ class CharacterImageWidget extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Center(
-          child: ColorFiltered(
-            colorFilter: ColorFilter.matrix(<double>[
-              0.9,
-              0.1,
-              0.1,
-              0,
-              isDark ? 20 : 50,
-              0.1,
-              0.7,
-              0.1,
-              0,
-              isDark ? 10 : 30,
-              0.1,
-              0.1,
-              0.6,
-              0,
-              isDark ? 5 : 20,
-              0,
-              0,
-              0,
-              1,
-              0,
-            ]),
-            child: Opacity(
-              opacity: isDark ? 0.08 : 0.25,
-              child: Image.asset(
-                page.imageAsset,
-                fit: BoxFit.cover,
-                height: constraints.maxHeight,
-                errorBuilder: (context, error, stack) =>
-                    const SizedBox.shrink(),
-              ),
-            ),
+        return ColorFiltered(
+          colorFilter: ColorFilter.matrix(<double>[
+            0.9,
+            0.1,
+            0.1,
+            0,
+            isDark ? 20 : 50,
+            0.1,
+            0.7,
+            0.1,
+            0,
+            isDark ? 10 : 30,
+            0.1,
+            0.1,
+            0.6,
+            0,
+            isDark ? 5 : 20,
+            0,
+            0,
+            0,
+            1,
+            0,
+          ]),
+          child: Image.asset(
+            page.imageAsset,
+            fit: BoxFit.cover,
+            height: constraints.maxHeight,
+            opacity: AlwaysStoppedAnimation(isDark ? 0.08 : 0.25),
+            errorBuilder: (context, error, stack) => const SizedBox.shrink(),
           ),
         );
       },
@@ -437,50 +253,55 @@ class CharacterImageWidget extends StatelessWidget {
   }
 }
 
-class ManuscriptPageCard extends StatelessWidget {
-  final ManuscriptPage page;
-  final VoidCallback onLikeToggle;
-  final VoidCallback onShare;
+class AnimatedTextContentWidget extends StatelessWidget {
+  final String title;
+  final String quote;
+  final Color inkBlack;
+  final Color inkGray;
+  final bool isDark;
+  final bool animate;
 
-  const ManuscriptPageCard({
+  const AnimatedTextContentWidget({
     super.key,
-    required this.page,
-    required this.onLikeToggle,
-    required this.onShare,
+    required this.title,
+    required this.quote,
+    required this.inkBlack,
+    required this.inkGray,
+    required this.isDark,
+    this.animate = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final paperBase = isDark ? AppColors.darkPaperBase : AppColors.paperBase;
-    final inkBlack = isDark ? AppColors.darkInkLight : AppColors.inkBlack;
-    final inkGray = isDark ? AppColors.darkInkGray : AppColors.inkGray;
-
-    return ColoredBox(
-      color: paperBase,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          PaperTextureWidget(isDark: isDark),
-          AgedEdgesWidget(isDark: isDark),
-          CharacterImageWidget(page: page, isDark: isDark),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                spacing: 32,
-                children: [
-                  CenteredTitleWidget(title: page.title, inkBlack: inkBlack),
-                  CenteredQuoteWidget(quote: page.quote, inkGray: inkGray),
-                  CenterAuthorWidget(color: inkGray),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 64, 32, 128),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        spacing: 32,
+        children: AnimateList(
+          interval: 100.ms,
+          delay: 100.ms,
+          effects: [
+            FadeEffect(
+              duration: kAnimationDuration,
+              begin: 0.1,
+              curve: Curves.easeOutCubic,
             ),
-          ),
-        ],
+            SlideEffect(
+              begin: const Offset(0, 0.25),
+              end: Offset.zero,
+              duration: kAnimationDuration,
+              curve: Curves.easeOutCubic,
+            ),
+          ],
+          children: [
+            CenteredTitleWidget(title: title, inkBlack: inkBlack),
+            CenteredQuoteWidget(quote: quote, inkGray: inkGray),
+            CenterAuthorWidget(color: inkGray),
+          ],
+        ),
       ),
     );
   }
