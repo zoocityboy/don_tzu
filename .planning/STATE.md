@@ -22,7 +22,7 @@
 
 ## Progress
 
-- **Phase 1:** Started — Address code issues
+- **Phase 1:** Planned — Language parameter support (01-01-PLAN.md)
 - Remaining: Fix localization, TTS print(), catch blocks
 
 ## Active Files

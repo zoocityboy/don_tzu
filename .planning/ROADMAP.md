@@ -16,7 +16,7 @@
 
 **Goal:** Address code issues, fix localization problems, and prepare for production release.
 
-**Requirements:** REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012
+**Requirements:** REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012, LANG-01
 
 **Success criteria:**
 1. Fix localization import errors in manuscript_localizations.dart
@@ -25,6 +25,12 @@
 4. Verify all 12 requirements tested and passing
 5. Build APK successfully (debug)
 6. Code analysis passes with no errors
+7. Language parameter support (cs-CZ format)
+8. Proper translations based on locale
+
+**Plans:**
+- [ ] 01-01-PLAN.md — Language parameter support
+- [ ] 02-01-PLAN.md — Fix analysis warnings (print, catch blocks)
 
 ---
 
