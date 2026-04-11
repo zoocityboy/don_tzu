@@ -3,8 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/theme/app_theme.dart';
-import '../../domain/entities/manuscript_page.dart';
+import 'package:art_of_deal_war/core/theme/app_theme.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
+
+const Duration kAnimationDuration = Duration(milliseconds: 1000);
 
 class AgedEdgesWidget extends StatelessWidget {
   final bool isDark;
@@ -133,6 +135,231 @@ class CenteredTitleWidget extends StatelessWidget {
   }
 }
 
+class AnimatedTextContentWidget extends StatefulWidget {
+  final String title;
+  final String quote;
+  final Color inkBlack;
+  final Color inkGray;
+  final bool isDark;
+  final bool animate;
+
+  const AnimatedTextContentWidget({
+    super.key,
+    required this.title,
+    required this.quote,
+    required this.inkBlack,
+    required this.inkGray,
+    required this.isDark,
+    this.animate = true,
+  });
+
+  @override
+  State<AnimatedTextContentWidget> createState() =>
+      _AnimatedTextContentWidgetState();
+}
+
+class _AnimatedTextContentWidgetState extends State<AnimatedTextContentWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: kAnimationDuration,
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    if (widget.animate) {
+      _controller.forward();
+    } else {
+      _controller.value = 1;
+    }
+  }
+
+  @override
+  void didUpdateWidget(AnimatedTextContentWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animate && !oldWidget.animate) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return FractionalTranslation(
+          translation: _slideAnimation.value,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: _buildContent(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContent() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        spacing: 32,
+        children: [
+          CenteredTitleWidget(title: widget.title, inkBlack: widget.inkBlack),
+          CenteredQuoteWidget(quote: widget.quote, inkGray: widget.inkGray),
+          CenterAuthorWidget(color: widget.inkGray),
+        ],
+      ),
+    );
+  }
+}
+
+class AnimatedCharacterImageWidget extends StatefulWidget {
+  final ManuscriptPage page;
+  final bool isDark;
+  final bool animate;
+
+  const AnimatedCharacterImageWidget({
+    super.key,
+    required this.page,
+    required this.isDark,
+    this.animate = true,
+  });
+
+  @override
+  State<AnimatedCharacterImageWidget> createState() =>
+      _AnimatedCharacterImageWidgetState();
+}
+
+class _AnimatedCharacterImageWidgetState
+    extends State<AnimatedCharacterImageWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _rotationAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: kAnimationDuration,
+      vsync: this,
+    );
+    _rotationAnimation = Tween<double>(
+      begin: 0.025,
+      end: 0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _scaleAnimation = Tween<double>(
+      begin: 1.2,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    if (widget.animate) {
+      _controller.forward();
+    } else {
+      _controller.value = 1;
+    }
+  }
+
+  @override
+  void didUpdateWidget(AnimatedCharacterImageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animate && !oldWidget.animate) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.page.imageAsset.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: RotationTransition(
+            turns: _rotationAnimation,
+            child: _buildImage(context),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImage(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Center(
+          child: ColorFiltered(
+            colorFilter: ColorFilter.matrix(<double>[
+              0.9,
+              0.1,
+              0.1,
+              0,
+              widget.isDark ? 20 : 50,
+              0.1,
+              0.7,
+              0.1,
+              0,
+              widget.isDark ? 10 : 30,
+              0.1,
+              0.1,
+              0.6,
+              0,
+              widget.isDark ? 5 : 20,
+              0,
+              0,
+              0,
+              1,
+              0,
+            ]),
+            child: Opacity(
+              opacity: widget.isDark ? 0.08 : 0.25,
+              child: Image.asset(
+                widget.page.imageAsset,
+                fit: BoxFit.cover,
+                height: constraints.maxHeight,
+                cacheHeight:
+                    constraints.maxHeight.toInt() *
+                    MediaQuery.of(context).devicePixelRatio.toInt(),
+                errorBuilder: (context, error, stack) =>
+                    const SizedBox.shrink(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class CharacterImageWidget extends StatelessWidget {
   final ManuscriptPage page;
   final bool isDark;
@@ -180,7 +407,8 @@ class CharacterImageWidget extends StatelessWidget {
                 page.imageAsset,
                 fit: BoxFit.cover,
                 height: constraints.maxHeight,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                errorBuilder: (context, error, stack) =>
+                    const SizedBox.shrink(),
               ),
             ),
           ),
@@ -209,7 +437,7 @@ class ManuscriptPageCard extends StatelessWidget {
     final inkBlack = isDark ? AppColors.darkInkLight : AppColors.inkBlack;
     final inkGray = isDark ? AppColors.darkInkGray : AppColors.inkGray;
 
-    return Container(
+    return ColoredBox(
       color: paperBase,
       child: Stack(
         fit: StackFit.expand,
@@ -219,7 +447,7 @@ class ManuscriptPageCard extends StatelessWidget {
           CharacterImageWidget(page: page, isDark: isDark),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(32, 0, 32, 64),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,

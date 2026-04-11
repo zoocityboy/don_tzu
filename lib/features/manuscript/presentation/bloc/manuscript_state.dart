@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/manuscript_page.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
 
 abstract class ManuscriptState extends Equatable {
   const ManuscriptState();

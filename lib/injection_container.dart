@@ -1,12 +1,16 @@
+import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
+import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_local_datasource.dart';
+import 'package:art_of_deal_war/features/manuscript/data/repositories/manuscript_repository_impl.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'features/manuscript/data/datasources/manuscript_local_datasource.dart';
-import 'features/manuscript/data/repositories/manuscript_repository_impl.dart';
-import 'features/manuscript/domain/repositories/manuscript_repository.dart';
-import 'features/manuscript/presentation/bloc/manuscript_bloc.dart';
 
-final getIt = GetIt.instance;
+final GetIt getIt = GetIt.instance;
 
 void setupDependencies() {
+  // Theme
+  getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
+
   // Data sources
   getIt.registerLazySingleton<ManuscriptLocalDataSource>(
     () => ManuscriptLocalDataSourceImpl(),

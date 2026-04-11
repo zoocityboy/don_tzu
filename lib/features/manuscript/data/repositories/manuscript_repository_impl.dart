@@ -1,6 +1,6 @@
-import '../../domain/entities/manuscript_page.dart';
-import '../../domain/repositories/manuscript_repository.dart';
-import '../datasources/manuscript_local_datasource.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
+import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_local_datasource.dart';
 
 class ManuscriptRepositoryImpl implements ManuscriptRepository {
   final ManuscriptLocalDataSource _localDataSource;

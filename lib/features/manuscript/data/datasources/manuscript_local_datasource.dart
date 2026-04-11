@@ -1,4 +1,4 @@
-import '../models/manuscript_page_model.dart';
+import 'package:art_of_deal_war/features/manuscript/data/models/manuscript_page_model.dart';
 
 abstract class ManuscriptLocalDataSource {
   Future<Set<String>> getLikedPageIds();
@@ -158,7 +158,7 @@ class ManuscriptLocalDataSourceImpl implements ManuscriptLocalDataSource {
 
   @override
   Future<List<ManuscriptPageModel>> getManuscriptPages() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     return _samplePages;
   }
 

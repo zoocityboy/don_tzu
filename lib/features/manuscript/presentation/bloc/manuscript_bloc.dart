@@ -1,7 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:share_plus/share_plus.dart';
-import '../../domain/entities/manuscript_page.dart';
-import '../../domain/repositories/manuscript_repository.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
 import 'manuscript_event.dart';
 import 'manuscript_state.dart';
 
@@ -21,7 +19,7 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
     try {
       final pages = await _repository.getManuscriptPages();
       emit(ManuscriptLoaded(pages: pages));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ManuscriptError(e.toString()));
     }
   }
@@ -43,22 +41,9 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
         }).toList();
 
         emit(currentState.copyWith(pages: updatedPages));
-      } catch (e) {
+      } on Exception {
         // Silently fail - don't disrupt the user experience
       }
     }
-  }
-
-  Future<void> _sharePage(ManuscriptPage page) async {
-    final text =
-        '''${page.title}
-
-"${page.quote}"
-
-— The Art of Deal War
-
-Shared from The Art of Deal War app''';
-
-    await Share.share(text);
   }
 }

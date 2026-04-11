@@ -6,14 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/theme_provider.dart';
-import '../../../../main.dart' show clearCache;
-import '../../domain/entities/manuscript_page.dart';
-import '../bloc/manuscript_bloc.dart';
-import '../bloc/manuscript_event.dart';
-import '../bloc/manuscript_state.dart';
-import '../widgets/manuscript_page_card.dart';
+import 'package:art_of_deal_war/core/theme/app_theme.dart';
+import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_event.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_state.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/widgets/manuscript_page_card.dart';
+import 'package:art_of_deal_war/main.dart' show clearCache;
 
 class ActionBarWidget extends StatelessWidget {
   final ManuscriptPage page;
@@ -234,30 +234,102 @@ class ManuscriptFeedPage extends StatefulWidget {
   State<ManuscriptFeedPage> createState() => _ManuscriptFeedPageState();
 }
 
-class PageContentWidget extends StatelessWidget {
+class PageContentWidget extends StatefulWidget {
   final ManuscriptPage page;
   final VoidCallback onLike;
   final VoidCallback onShare;
+  final bool shouldAnimate;
 
   const PageContentWidget({
     super.key,
     required this.page,
     required this.onLike,
     required this.onShare,
+    this.shouldAnimate = false,
   });
 
   @override
+  State<PageContentWidget> createState() => _PageContentWidgetState();
+}
+
+class _PageContentWidgetState extends State<PageContentWidget> {
+  bool _animateText = false;
+  bool _animateImage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.shouldAnimate) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {
+            _animateText = true;
+            _animateImage = true;
+          });
+        }
+      });
+    } else {
+      _animateText = true;
+      _animateImage = true;
+    }
+  }
+
+  @override
+  void didUpdateWidget(PageContentWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shouldAnimate && !oldWidget.shouldAnimate) {
+      setState(() {
+        _animateText = false;
+        _animateImage = false;
+      });
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {
+            _animateText = true;
+            _animateImage = true;
+          });
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final paperBase = isDark ? AppColors.darkPaperBase : AppColors.paperBase;
+    final inkBlack = isDark ? AppColors.darkInkLight : AppColors.inkBlack;
+    final inkGray = isDark ? AppColors.darkInkGray : AppColors.inkGray;
+
     return GestureDetector(
       onDoubleTap: () {
         HapticFeedback.mediumImpact();
-        onLike();
+        widget.onLike();
       },
       behavior: HitTestBehavior.opaque,
-      child: ManuscriptPageCard(
-        page: page,
-        onLikeToggle: onLike,
-        onShare: onShare,
+      child: Container(
+        color: paperBase,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            PaperTextureWidget(isDark: isDark),
+            AgedEdgesWidget(isDark: isDark),
+            AnimatedCharacterImageWidget(
+              page: widget.page,
+              isDark: isDark,
+              animate: _animateImage,
+            ),
+            SafeArea(
+              child: AnimatedTextContentWidget(
+                title: widget.page.title,
+                quote: widget.page.quote,
+                inkBlack: inkBlack,
+                inkGray: inkGray,
+                isDark: isDark,
+                animate: _animateText,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -324,7 +396,8 @@ class SealStampWidget extends StatelessWidget {
     return GestureDetector(
       onLongPress: () async {
         HapticFeedback.heavyImpact();
-        await clearCache();
+        final cacheCleared = clearCache();
+        await cacheCleared;
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -363,7 +436,7 @@ class ThemeToggleButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        context.read<ThemeProvider>().toggleTheme();
+        context.read<ThemeCubit>().toggleTheme();
       },
       child: Container(
         padding: const EdgeInsets.all(8),
