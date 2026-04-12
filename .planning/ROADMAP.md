@@ -2,13 +2,14 @@
 
 **Generated:** 2026-04-11 after initialization
 **Version:** 1.0.0
-**Phases:** 1 | **Requirements:** 12 mapped | All v1 requirements covered ✓
+**Phases:** 2 | **Requirements:** 12 mapped | All v1 requirements covered ✓
 
 ## Overview
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
 | 1 | Polish & Ship | Fix issues and prepare release | REQ-001 to REQ-012 | 6 criteria |
+| 2 | Features | Settings + TTS generation | REQ-SETTINGS, REQ-TTS | 4 criteria |
 
 ## Phase Details
 
@@ -31,6 +32,21 @@
 **Plans:**
 - [ ] 01-01-PLAN.md — Language parameter support
 - [ ] 02-01-PLAN.md — Fix analysis warnings (print, catch blocks)
+
+### Phase 2: Features
+
+**Goal:** Implement settings with repository pattern and TTS generation improvements.
+
+**Requirements:** REQ-SETTINGS (user preferences), REQ-TTS (enhanced TTS)
+
+**Success criteria:**
+1. Settings repository with data source pattern
+2. TTS generation improvements
+3. Clean architecture compliance
+4. flutter analyze passes
+
+**Plans:**
+- [x] 02-01-PLAN.md — Settings repository
 
 ---
 
