@@ -4,15 +4,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:art_of_deal_war/core/services/tts_audio_player.dart';
 import 'package:art_of_deal_war/core/services/tts_service.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
-import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_event.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_state.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/manuscript_page_card.dart';
-import 'package:art_of_deal_war/main.dart' show clearCache;
+import 'package:art_of_deal_war/core/theme/settings_cubit.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/widgets/settings_bottom_sheet.dart';
 import 'package:art_of_deal_war/injection_container.dart' as di;
 
 class ActionBarWidget extends StatelessWidget {
@@ -110,18 +111,9 @@ class _SealStampButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () async {
-        HapticFeedback.heavyImpact();
-        final cacheCleared = clearCache();
-        await cacheCleared;
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Cache cleared!', style: GoogleFonts.notoSansJp()),
-              backgroundColor: AppColors.vermillion,
-            ),
-          );
-        }
+      onTap: () {
+        HapticFeedback.lightImpact();
+        SettingsBottomSheet.show(context);
       },
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -149,7 +141,7 @@ class CenteredLayout extends StatelessWidget {
   final void Function(int) onPageChanged;
   final void Function(String) onLike;
   final void Function(ManuscriptPage) onShare;
-  final TtsService ttsService;
+  final TtsAudioPlayer ttsAudioPlayer;
 
   const CenteredLayout({
     super.key,
@@ -159,7 +151,7 @@ class CenteredLayout extends StatelessWidget {
     required this.onPageChanged,
     required this.onLike,
     required this.onShare,
-    required this.ttsService,
+    required this.ttsAudioPlayer,
   });
 
   @override
@@ -187,7 +179,7 @@ class CenteredLayout extends StatelessWidget {
             // Right-side action buttons (TikTok style)
             Positioned(
               right: 16,
-              bottom: 100,
+              bottom: 32,
               child: SafeArea(
                 child: ActionBarWidget(
                   page: pages[currentPage],
@@ -196,9 +188,9 @@ class CenteredLayout extends StatelessWidget {
                 ),
               ),
             ),
-            // Page indicator at top of screen
+            // Page indicator at bottom of screen
             Positioned(
-              top: 60,
+              bottom: 0,
               left: 0,
               right: 0,
               child: SafeArea(
@@ -215,10 +207,11 @@ class CenteredLayout extends StatelessWidget {
               child: SafeArea(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  spacing: 8,
                   children: [
-                    TtsMuteButton(ttsService: ttsService),
-                    const SizedBox(width: 8),
-                    const ThemeToggleButton(),
+                    TtsMuteButton(ttsAudioPlayer: ttsAudioPlayer),
+                    const SettingsToggleButton(),
                   ],
                 ),
               ),
@@ -384,46 +377,8 @@ class PageIndicatorWidget extends StatelessWidget {
   }
 }
 
-class SealStampWidget extends StatelessWidget {
-  const SealStampWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: () async {
-        HapticFeedback.heavyImpact();
-        final cacheCleared = clearCache();
-        await cacheCleared;
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Cache cleared!', style: GoogleFonts.notoSansJp()),
-              backgroundColor: AppColors.vermillion,
-            ),
-          );
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.vermillion, width: 2),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          '戰',
-          style: GoogleFonts.notoSerifJp(
-            fontSize: 20,
-            color: AppColors.vermillion,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ThemeToggleButton extends StatelessWidget {
-  const ThemeToggleButton({super.key});
+class SettingsToggleButton extends StatelessWidget {
+  const SettingsToggleButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -432,7 +387,7 @@ class ThemeToggleButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        context.read<ThemeCubit>().toggleTheme();
+        SettingsBottomSheet.show(context);
       },
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -446,7 +401,7 @@ class ThemeToggleButton extends StatelessWidget {
           ),
         ),
         child: Icon(
-          isDark ? Icons.light_mode : Icons.dark_mode,
+          Icons.settings_outlined,
           color: isDark ? AppColors.darkInkLight : AppColors.inkLight,
           size: 20,
         ),
@@ -456,9 +411,9 @@ class ThemeToggleButton extends StatelessWidget {
 }
 
 class TtsMuteButton extends StatelessWidget {
-  final TtsService ttsService;
+  final TtsAudioPlayer ttsAudioPlayer;
 
-  const TtsMuteButton({super.key, required this.ttsService});
+  const TtsMuteButton({super.key, required this.ttsAudioPlayer});
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +424,7 @@ class TtsMuteButton extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             HapticFeedback.lightImpact();
-            ttsService.toggleMute();
+            ttsAudioPlayer.toggleMute();
             setState(() {});
           },
           child: Container(
@@ -484,7 +439,7 @@ class TtsMuteButton extends StatelessWidget {
               ),
             ),
             child: Icon(
-              ttsService.isMuted ? Icons.volume_off : Icons.volume_up,
+              ttsAudioPlayer.isMuted ? Icons.volume_off : Icons.volume_up,
               color: isDark ? AppColors.darkInkLight : AppColors.inkLight,
               size: 20,
             ),
@@ -497,7 +452,7 @@ class TtsMuteButton extends StatelessWidget {
 
 class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
   final PageController _pageController = PageController();
-  final TtsService _ttsService = di.getIt<TtsService>();
+  final _ttsAudioPlayer = TtsAudioPlayer();
   int _currentPage = 0;
 
   @override
@@ -505,15 +460,26 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkPaperBase : AppColors.paperBase,
-      body: BlocBuilder<ManuscriptBloc, ManuscriptState>(
-        builder: (context, state) => _buildBody(state),
+      body: BlocListener<SettingsCubit, SettingsState>(
+        listenWhen: (prev, curr) => prev.language != curr.language,
+        listener: (context, state) {
+          _ttsAudioPlayer.stop();
+          _currentPage = 0;
+          _pageController.jumpToPage(0);
+          context.read<ManuscriptBloc>().add(
+            LoadManuscriptPages(language: state.language),
+          );
+        },
+        child: BlocBuilder<ManuscriptBloc, ManuscriptState>(
+          builder: (context, state) => _buildBody(state),
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
-    _ttsService.stop();
+    _ttsAudioPlayer.stop();
     _pageController.dispose();
     super.dispose();
   }
@@ -537,7 +503,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
         onPageChanged: _onPageChanged,
         onLike: _onLike,
         onShare: _sharePage,
-        ttsService: _ttsService,
+        ttsAudioPlayer: _ttsAudioPlayer,
       ),
       _ => const LoadingWidget(),
     };
@@ -550,13 +516,23 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
 
   void _onPageChanged(int index) {
     if (index != _currentPage) {
-      _ttsService.stop();
+      _ttsAudioPlayer.stop();
     }
     setState(() => _currentPage = index);
     final state = context.read<ManuscriptBloc>().state;
     if (state is ManuscriptLoaded && index < state.pages.length) {
       final page = state.pages[index];
-      _ttsService.playChapter(page.id);
+      final settingsState = context.read<SettingsCubit>().state;
+      if (settingsState.ttsReaderEnabled) {
+        final ttsService = di.getIt<TtsService>();
+        final filePath = ttsService.getFilePath(
+          page.id,
+          settingsState.language,
+        );
+        if (filePath != null) {
+          _ttsAudioPlayer.play(filePath);
+        }
+      }
     }
   }
 

@@ -1,14 +1,15 @@
 import 'package:art_of_deal_war/features/manuscript/l10n/generated/manuscript_localizations.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:art_of_deal_war/core/router/app_router.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
+import 'package:art_of_deal_war/core/theme/settings_cubit.dart';
 import 'package:art_of_deal_war/injection_container.dart' as di;
 import 'package:art_of_deal_war/l10n/generated/app_localizations.dart';
 
@@ -17,7 +18,7 @@ void main() async {
 
   await Hive.initFlutter();
 
-  di.setupDependencies();
+  await di.setupDependencies();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
@@ -28,7 +29,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(const ArtOfDealWarApp());
+  runApp(const App());
 }
 
 Future<void> clearCache() async {
@@ -40,37 +41,34 @@ Future<void> clearCache() async {
   }
 }
 
-class ArtOfDealWarApp extends StatelessWidget {
-  const ArtOfDealWarApp({super.key});
-
+class App extends StatelessWidget {
+  const App({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: di.getIt<ThemeCubit>(),
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => di.getIt<ThemeCubit>()),
+        BlocProvider(create: (_) => di.getIt<ManuscriptBloc>()),
+        BlocProvider(create: (_) => di.getIt<SettingsCubit>()..loadSettings()),
+      ],
+      child: BlocBuilder<SettingsCubit, SettingsState>(
+        builder: (context, settings) {
+          final themeMode = settings.themeMode;
+          final locale = Locale(settings.language);
+
           return MaterialApp.router(
             title: 'The Art of Deal War',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeMode,
+            locale: locale,
             routerConfig: appRouter,
-            localizationsDelegates: [
-              AppLocalizations.delegate,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
               ManuscriptLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [
-              Locale('en'),
-              Locale('cs'),
-              Locale('de'),
-              Locale('hu'),
-              Locale('pl'),
-              Locale('sk'),
-            ],
+            supportedLocales: AppLocalizations.supportedLocales,
             scrollBehavior:
                 [
                   TargetPlatform.windows,

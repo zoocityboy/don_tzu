@@ -274,7 +274,7 @@ class AnimatedTextContentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 64, 32, 128),
+      padding: const EdgeInsets.fromLTRB(32, 64, 32, 64),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,

@@ -1,9 +1,6 @@
-import 'dart:ui';
-
 import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
-import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_local_datasource.dart';
-import 'package:art_of_deal_war/features/manuscript/l10n/generated/manuscript_localizations.dart';
+import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_datasource.dart';
 
 class ManuscriptRepositoryImpl implements ManuscriptRepository {
   final ManuscriptLocalDataSource _localDataSource;
@@ -11,18 +8,9 @@ class ManuscriptRepositoryImpl implements ManuscriptRepository {
 
   ManuscriptRepositoryImpl(this._localDataSource);
 
-  Locale _parseLocale(String language) {
-    if (language.contains('-')) {
-      return Locale(language.split('-').first);
-    }
-    return Locale(language);
-  }
-
   @override
   Future<List<ManuscriptPage>> getManuscriptPages(String language) async {
-    final locale = _parseLocale(language);
-    final l10n = lookupManuscriptLocalizations(locale);
-    final models = await _localDataSource.getManuscriptPages(l10n);
+    final models = await _localDataSource.getManuscriptPages(language);
     _likedPageIds = await _localDataSource.getLikedPageIds();
 
     return models.map((model) {
@@ -49,5 +37,38 @@ class ManuscriptRepositoryImpl implements ManuscriptRepository {
   @override
   Future<Set<String>> getLikedPageIds() async {
     return _likedPageIds;
+  }
+
+  @override
+  List<MapEntry<String, String>> getChaptersForTts(String language) {
+    return _localDataSource.getChaptersForTts(language);
+  }
+
+  @override
+  Future<bool> initTtsForLanguage(String languageCode) async {
+    return _localDataSource.initTtsForLanguage(languageCode);
+  }
+
+  @override
+  Future<void> playTtsChapter(String chapterId, {String? languageCode}) async {
+    await _localDataSource.playTtsChapter(
+      chapterId,
+      languageCode: languageCode,
+    );
+  }
+
+  @override
+  Future<void> stopTts() async {
+    await _localDataSource.stopTts();
+  }
+
+  @override
+  Future<void> pauseTts() async {
+    await _localDataSource.pauseTts();
+  }
+
+  @override
+  bool isTtsReadyForLanguage(String languageCode) {
+    return _localDataSource.isTtsReadyForLanguage(languageCode);
   }
 }

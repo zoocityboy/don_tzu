@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:art_of_deal_war/core/services/audio_service.dart';
+import 'package:art_of_deal_war/core/services/background_music_player.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_state.dart';
@@ -23,7 +23,7 @@ class IntroCoverPage extends StatefulWidget {
 
 class _IntroCoverPageState extends State<IntroCoverPage> {
   bool _showContent = false;
-  final AudioService _audioService = AudioService();
+  final _audioPlayer = BackgroundMusicPlayer();
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _IntroCoverPageState extends State<IntroCoverPage> {
   void _handleEnter(IntroState state) {
     if (state is! IntroReady) return;
     HapticFeedback.mediumImpact();
-    _audioService.playBackgroundMusic();
+    _audioPlayer.play('sound/walen-lonely-samurai.mp3');
     widget.onEnter();
   }
 

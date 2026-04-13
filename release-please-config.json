@@ -1,0 +1,10 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "dart",
+      "package-name": "art_of_deal_war",
+      "tag-separator": "v",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
