@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:art_of_deal_war/features/settings/domain/entities/user_settings.dart';
-import 'package:art_of_deal_war/features/settings/domain/repositories/settings_repository.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/audio_music_cubit.dart';
 
 class SettingsState {
   final ThemeMode themeMode;
@@ -33,7 +34,9 @@ class SettingsState {
 }
 
 class SettingsCubit extends Cubit<SettingsState> {
-  final SettingsRepository _repository;
+  final AudioMusicCubit _audioMusicCubit;
+  final TtsCubit _ttsCubit;
+  final UserSettings _settings;
 
   static const List<Map<String, String>> supportedLanguages = [
     {'code': 'en', 'name': 'English'},
@@ -45,77 +48,56 @@ class SettingsCubit extends Cubit<SettingsState> {
   ];
 
   SettingsCubit({
-    required SettingsRepository repository,
-  }) : _repository = repository,
-       super(const SettingsState());
-
-  Future<void> loadSettings() async {
-    try {
-      final settings = await _repository.getSettings();
-      emit(
-        SettingsState(
-          themeMode: settings.themeMode,
-          backgroundMusicEnabled: settings.backgroundMusicEnabled,
-          ttsReaderEnabled: settings.ttsReaderEnabled,
-          language: settings.language,
-        ),
-      );
-      _applySettings(settings);
-    } on Exception catch (_) {
-      emit(const SettingsState());
-    }
+    required AudioMusicCubit audioMusicCubit,
+    required TtsCubit ttsCubit,
+    UserSettings? settings,
+  }) : _audioMusicCubit = audioMusicCubit,
+       _ttsCubit = ttsCubit,
+       _settings = settings ?? UserSettings.defaultSettings,
+       super(const SettingsState()) {
+    _loadFromSettings();
   }
 
-  void _applySettings(UserSettings settings) {
-    if (settings.backgroundMusicEnabled) {
-      _repository.playBackgroundMusic();
-    } else {
-      _repository.stopBackgroundMusic();
+  void _loadFromSettings() {
+    emit(
+      SettingsState(
+        themeMode: _settings.themeMode,
+        backgroundMusicEnabled: _settings.backgroundMusicEnabled,
+        ttsReaderEnabled: _settings.ttsReaderEnabled,
+        language: _settings.language,
+      ),
+    );
+    _applySettings();
+  }
+
+  void _applySettings() {
+    if (state.backgroundMusicEnabled) {
+      _audioMusicCubit.play('sound/walen-lonely-samurai.mp3');
     }
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    final current = _toUserSettings(state);
-    await _repository.saveSettings(current.copyWith(themeMode: mode));
     emit(state.copyWith(themeMode: mode));
   }
 
   Future<void> setBackgroundMusic(bool enabled) async {
-    final current = _toUserSettings(state);
-    await _repository.saveSettings(
-      current.copyWith(backgroundMusicEnabled: enabled),
-    );
     emit(state.copyWith(backgroundMusicEnabled: enabled));
-
     if (enabled) {
-      await _repository.playBackgroundMusic();
+      await _audioMusicCubit.play('sound/walen-lonely-samurai.mp3');
     } else {
-      await _repository.stopBackgroundMusic();
+      await _audioMusicCubit.stop();
     }
   }
 
   Future<void> setTtsReader(bool enabled) async {
-    final current = _toUserSettings(state);
-    await _repository.saveSettings(current.copyWith(ttsReaderEnabled: enabled));
-    await _repository.setTtsEnabled(enabled);
     emit(state.copyWith(ttsReaderEnabled: enabled));
+    _ttsCubit.toggleMute();
   }
 
   Future<bool> setLanguage(String languageCode) async {
-    final current = _toUserSettings(state);
-    await _repository.saveSettings(current.copyWith(language: languageCode));
     emit(state.copyWith(language: languageCode));
     return true;
   }
 
   bool get ttsReaderEnabled => state.ttsReaderEnabled;
-
-  UserSettings _toUserSettings(SettingsState state) {
-    return UserSettings(
-      themeMode: state.themeMode,
-      language: state.language,
-      backgroundMusicEnabled: state.backgroundMusicEnabled,
-      ttsReaderEnabled: state.ttsReaderEnabled,
-    );
-  }
 }

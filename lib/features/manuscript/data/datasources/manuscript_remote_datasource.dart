@@ -1,15 +1,17 @@
 import 'package:flutter/services.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:art_of_deal_war/features/manuscript/data/models/manuscript_page_model.dart';
 import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_datasource.dart';
 import 'package:art_of_deal_war/core/services/pocketbase_service.dart';
-import 'package:art_of_deal_war/core/services/tts_service.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
 import 'package:art_of_deal_war/core/services/tts_text_model.dart';
-import 'package:art_of_deal_war/core/services/tts_audio_player.dart';
+
+const String _likedBoxName = 'liked_pages';
+const String _likedPageIdsKey = 'ids';
 
 class ManuscriptRemoteDataSource implements ManuscriptLocalDataSource {
   final PocketBaseService _pocketBaseService;
-  final TtsService _ttsService;
-  final TtsAudioPlayer _ttsAudioPlayer;
+  final TtsCubit _ttsCubit;
 
   final Map<String, List<ManuscriptPageModel>> _cache = {};
 
@@ -24,15 +26,24 @@ class ManuscriptRemoteDataSource implements ManuscriptLocalDataSource {
 
   ManuscriptRemoteDataSource({
     required PocketBaseService pocketBaseService,
-    required TtsService ttsService,
-    required TtsAudioPlayer ttsAudioPlayer,
+    required TtsCubit ttsCubit,
   }) : _pocketBaseService = pocketBaseService,
-       _ttsService = ttsService,
-       _ttsAudioPlayer = ttsAudioPlayer;
+       _ttsCubit = ttsCubit;
+
+  Future<Box> get _likedBox => Hive.openBox(_likedBoxName);
 
   @override
   Future<Set<String>> getLikedPageIds() async {
-    return {};
+    final box = await _likedBox;
+    final List<dynamic> ids =
+        box.get(_likedPageIdsKey, defaultValue: <dynamic>[]) as List<dynamic>;
+    return ids.map((e) => e.toString()).toSet();
+  }
+
+  @override
+  Future<void> saveLikedPageIds(Set<String> ids) async {
+    final box = await _likedBox;
+    await box.put(_likedPageIdsKey, ids.toList());
   }
 
   @override
@@ -115,36 +126,9 @@ class ManuscriptRemoteDataSource implements ManuscriptLocalDataSource {
   }
 
   @override
-  Future<void> saveLikedPageIds(Set<String> ids) async {}
-
-  @override
   List<MapEntry<String, String>> getChaptersForTts(String language) {
     final pages = _cache[_parseLanguage(language)] ?? [];
     return pages.map((page) => MapEntry(page.id, page.quote)).toList();
-  }
-
-  List<TtsTextModel> getTtsTexts(String language) {
-    final pages = _cache[_parseLanguage(language)] ?? [];
-    return pages
-        .map(
-          (p) => TtsTextModel(
-            id: p.id,
-            text: p.quote,
-            language: language,
-          ),
-        )
-        .toList();
-  }
-
-  String _parseLanguage(String language) {
-    if (language.contains('-')) {
-      return language.split('-').first;
-    }
-    return language;
-  }
-
-  void clearCache() {
-    _cache.clear();
   }
 
   @override
@@ -159,35 +143,43 @@ class ManuscriptRemoteDataSource implements ManuscriptLocalDataSource {
           ),
         )
         .toList();
-    await _ttsService.generateForLanguage(languageCode, texts);
-    return _ttsService.isLanguageReady(languageCode);
+    await _ttsCubit.generateForLanguage(languageCode, texts);
+    return _ttsCubit.isLanguageReady(languageCode);
   }
 
   @override
   String? getAudioFilePath(String chapterId, String languageCode) {
-    return _ttsService.getFilePath(chapterId, languageCode);
+    return _ttsCubit.getFilePath(chapterId, languageCode);
   }
 
   @override
   Future<void> playTtsChapter(String chapterId, {String? languageCode}) async {
-    final filePath = _ttsService.getFilePath(chapterId, languageCode ?? 'en');
-    if (filePath != null) {
-      await _ttsAudioPlayer.play(filePath);
-    }
+    await _ttsCubit.play(chapterId, languageCode ?? 'en');
   }
 
   @override
   Future<void> stopTts() async {
-    await _ttsAudioPlayer.stop();
+    await _ttsCubit.stop();
   }
 
   @override
   Future<void> pauseTts() async {
-    await _ttsAudioPlayer.pause();
+    await _ttsCubit.pause();
   }
 
   @override
   bool isTtsReadyForLanguage(String languageCode) {
-    return _ttsService.isLanguageReady(languageCode);
+    return _ttsCubit.isLanguageReady(languageCode);
+  }
+
+  String _parseLanguage(String language) {
+    if (language.contains('-')) {
+      return language.split('-').first;
+    }
+    return language;
+  }
+
+  void clearCache() {
+    _cache.clear();
   }
 }

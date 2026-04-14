@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "clean-architecture": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "computedHash": "c5b03a3910c3e63eb9ae08bb782e9d67408212d989255def392944a03041b7ab"
+    },
+    "flutter-bloc-development": {
+      "source": "abdelhakrazi/flutter-bloc-clean-architecture-skill",
+      "sourceType": "github",
+      "computedHash": "fed75a2491b12164db8e91166f970b1745bc9df7e746afef1a00a3d3eb4b6060"
+    },
+    "flutter-dart-code-review": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "computedHash": "2b2cafafc1382ec7c79485f3609ec89baae4785a154585794575d21048b5d02c"
+    }
+  }
+}

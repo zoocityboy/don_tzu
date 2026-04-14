@@ -4,10 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
-import 'package:art_of_deal_war/core/theme/settings_cubit.dart';
-import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
-import 'package:art_of_deal_war/core/services/tts_service.dart';
 import 'package:art_of_deal_war/core/services/tts_text_model.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_event.dart';
 import 'package:art_of_deal_war/injection_container.dart' as di;
@@ -181,10 +181,10 @@ class SettingsBottomSheet extends StatelessWidget {
 
   Future<void> _onLanguageTap(BuildContext context, String languageCode) async {
     HapticFeedback.selectionClick();
-    final cubit = context.read<SettingsCubit>();
-
+    final settingsCubit = context.read<SettingsCubit>();
+    final ttsCubit = di.getIt<TtsCubit>();
     final repository = di.getIt<ManuscriptRepository>();
-    final ttsService = TtsService();
+
     final chapters = repository.getChaptersForTts(languageCode);
 
     if (chapters.isNotEmpty) {
@@ -215,7 +215,6 @@ class SettingsBottomSheet extends StatelessWidget {
       );
 
       try {
-        final chapters = repository.getChaptersForTts(languageCode);
         final texts = chapters
             .map(
               (e) => TtsTextModel(
@@ -226,7 +225,7 @@ class SettingsBottomSheet extends StatelessWidget {
             )
             .toList();
 
-        await ttsService.generateForLanguage(languageCode, texts);
+        await ttsCubit.generateForLanguage(languageCode, texts);
 
         if (dialogContext.mounted) {
           Navigator.of(dialogContext).pop();
@@ -238,7 +237,7 @@ class SettingsBottomSheet extends StatelessWidget {
       }
     }
 
-    await cubit.setLanguage(languageCode);
+    await settingsCubit.setLanguage(languageCode);
 
     if (context.mounted) {
       final bloc = context.read<ManuscriptBloc>();

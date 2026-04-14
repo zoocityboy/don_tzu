@@ -8,8 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:art_of_deal_war/core/router/app_router.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
-import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
-import 'package:art_of_deal_war/core/theme/settings_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:art_of_deal_war/injection_container.dart' as di;
 import 'package:art_of_deal_war/l10n/generated/app_localizations.dart';
 
@@ -47,9 +46,8 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => di.getIt<ThemeCubit>()),
         BlocProvider(create: (_) => di.getIt<ManuscriptBloc>()),
-        BlocProvider(create: (_) => di.getIt<SettingsCubit>()..loadSettings()),
+        BlocProvider(create: (_) => di.getIt<SettingsCubit>()),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, settings) {

@@ -1,59 +1,30 @@
-import 'package:art_of_deal_war/core/services/tts_service.dart';
-import 'package:art_of_deal_war/core/services/background_music_player.dart';
-import 'package:art_of_deal_war/core/services/tts_audio_player.dart';
 import 'package:art_of_deal_war/core/services/pocketbase_service.dart';
-import 'package:art_of_deal_war/core/theme/settings_cubit.dart';
-import 'package:art_of_deal_war/core/theme/theme_cubit.dart';
 import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_datasource.dart';
 import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_remote_datasource.dart';
 import 'package:art_of_deal_war/features/manuscript/data/repositories/manuscript_repository_impl.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/usecases/get_manuscript_pages_usecase.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/usecases/manuscript_usecases.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_bloc.dart';
-import 'package:art_of_deal_war/features/settings/data/datasources/settings_local_datasource.dart';
-import 'package:art_of_deal_war/features/settings/data/repositories/settings_repository_impl.dart';
-import 'package:art_of_deal_war/features/settings/domain/repositories/settings_repository.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/audio_music_cubit.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
-  // Services
-  getIt.registerLazySingleton<BackgroundMusicPlayer>(
-    () => BackgroundMusicPlayer(),
-  );
-  getIt.registerLazySingleton<TtsAudioPlayer>(() => TtsAudioPlayer());
-  getIt.registerLazySingleton<TtsService>(() => TtsService());
-
-  // PocketBase
   final pbService = await PocketBaseService.getInstance();
   getIt.registerLazySingleton<PocketBaseService>(() => pbService);
 
-  getIt.registerFactory<ThemeCubit>(() => ThemeCubit());
+  getIt.registerFactory<TtsCubit>(() => TtsCubit());
+  getIt.registerLazySingleton<AudioMusicCubit>(() => AudioMusicCubit());
 
-  // Settings
-  getIt.registerLazySingleton<SettingsLocalDataSource>(
-    () => SettingsLocalDataSourceImpl(
-      audioPlayerService: getIt<BackgroundMusicPlayer>(),
-      ttsService: getIt<TtsService>(),
-      ttsAudioPlayer: getIt<TtsAudioPlayer>(),
-    ),
-  );
-  getIt.registerLazySingleton<SettingsRepository>(
-    () => SettingsRepositoryImpl(getIt<SettingsLocalDataSource>()),
-  );
-  getIt.registerFactory<SettingsCubit>(
-    () => SettingsCubit(
-      repository: getIt<SettingsRepository>(),
-    ),
-  );
-
-  // Manuscripts - Remote data source with PocketBase + fallback to local JSON
   getIt.registerLazySingleton<ManuscriptLocalDataSource>(
     () => ManuscriptRemoteDataSource(
       pocketBaseService: pbService,
-      ttsService: getIt<TtsService>(),
-      ttsAudioPlayer: getIt<TtsAudioPlayer>(),
+      ttsCubit: getIt<TtsCubit>(),
     ),
   );
 
@@ -61,16 +32,31 @@ Future<void> setupDependencies() async {
     () => ManuscriptRepositoryImpl(getIt<ManuscriptLocalDataSource>()),
   );
 
-  // BLoCs
+  getIt.registerFactory<GetManuscriptPagesUseCase>(
+    () => GetManuscriptPagesUseCase(getIt<ManuscriptRepository>()),
+  );
+  getIt.registerFactory<ToggleLikeUseCase>(
+    () => ToggleLikeUseCase(getIt<ManuscriptRepository>()),
+  );
+
+  getIt.registerFactory<SettingsCubit>(
+    () => SettingsCubit(
+      audioMusicCubit: getIt<AudioMusicCubit>(),
+      ttsCubit: getIt<TtsCubit>(),
+    ),
+  );
+
   getIt.registerFactory<ManuscriptBloc>(
     () => ManuscriptBloc(
-      repository: getIt<ManuscriptRepository>(),
+      getManuscriptPagesUseCase: getIt<GetManuscriptPagesUseCase>(),
+      toggleLikeUseCase: getIt<ToggleLikeUseCase>(),
+      ttsCubit: getIt<TtsCubit>(),
     ),
   );
 
   getIt.registerFactory<IntroBloc>(
     () => IntroBloc(
-      repository: getIt<ManuscriptRepository>(),
+      ttsCubit: getIt<TtsCubit>(),
     ),
   );
 }

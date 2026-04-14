@@ -1,14 +1,32 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/usecases/get_manuscript_pages_usecase.dart';
+import 'package:art_of_deal_war/features/manuscript/domain/usecases/manuscript_usecases.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
+import 'package:art_of_deal_war/core/services/tts_text_model.dart';
 import 'manuscript_event.dart';
 import 'manuscript_state.dart';
 
 class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
-  final ManuscriptRepository _repository;
+  final GetManuscriptPagesUseCase _getManuscriptPagesUseCase;
+  final ToggleLikeUseCase _toggleLikeUseCase;
+  final TtsCubit _ttsCubit;
+
+  @override
+  void onChange(Change<ManuscriptState> change) {
+    super.onChange(change);
+    debugPrint(
+      'ManuscriptBloc state changed: ${change.currentState} -> ${change.nextState}',
+    );
+  }
 
   ManuscriptBloc({
-    required ManuscriptRepository repository,
-  }) : _repository = repository,
+    required GetManuscriptPagesUseCase getManuscriptPagesUseCase,
+    required ToggleLikeUseCase toggleLikeUseCase,
+    required TtsCubit ttsCubit,
+  }) : _getManuscriptPagesUseCase = getManuscriptPagesUseCase,
+       _toggleLikeUseCase = toggleLikeUseCase,
+       _ttsCubit = ttsCubit,
        super(const ManuscriptInitial()) {
     on<LoadManuscriptPages>(_onLoadManuscriptPages);
     on<ToggleLike>(_onToggleLike);
@@ -21,9 +39,12 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
     emit(const ManuscriptLoading());
     try {
       final language = event.language ?? 'en';
-      final pages = await _repository.getManuscriptPages(language);
+      final pages = await _getManuscriptPagesUseCase.call(language);
 
-      await _repository.initTtsForLanguage(language);
+      final texts = pages
+          .map((p) => TtsTextModel(id: p.id, text: p.quote, language: language))
+          .toList();
+      await _ttsCubit.generateForLanguage(language, texts);
       emit(ManuscriptLoaded(pages: pages));
     } on Exception catch (e) {
       emit(ManuscriptError(e.toString()));
@@ -37,7 +58,7 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
     final currentState = state;
     if (currentState is ManuscriptLoaded) {
       try {
-        await _repository.toggleLike(event.pageId);
+        await _toggleLikeUseCase.call(event.pageId);
 
         final updatedPages = currentState.pages.map((page) {
           if (page.id == event.pageId) {

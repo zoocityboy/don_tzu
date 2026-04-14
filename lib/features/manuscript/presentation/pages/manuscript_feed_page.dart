@@ -4,15 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'package:art_of_deal_war/core/services/tts_audio_player.dart';
-import 'package:art_of_deal_war/core/services/tts_service.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_event.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_state.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/manuscript_page_card.dart';
-import 'package:art_of_deal_war/core/theme/settings_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/settings_bottom_sheet.dart';
 import 'package:art_of_deal_war/injection_container.dart' as di;
 
@@ -141,7 +140,7 @@ class CenteredLayout extends StatelessWidget {
   final void Function(int) onPageChanged;
   final void Function(String) onLike;
   final void Function(ManuscriptPage) onShare;
-  final TtsAudioPlayer ttsAudioPlayer;
+  final TtsCubit ttsCubit;
 
   const CenteredLayout({
     super.key,
@@ -151,7 +150,7 @@ class CenteredLayout extends StatelessWidget {
     required this.onPageChanged,
     required this.onLike,
     required this.onShare,
-    required this.ttsAudioPlayer,
+    required this.ttsCubit,
   });
 
   @override
@@ -210,7 +209,7 @@ class CenteredLayout extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   spacing: 8,
                   children: [
-                    TtsMuteButton(ttsAudioPlayer: ttsAudioPlayer),
+                    TtsMuteButton(ttsCubit: ttsCubit),
                     const SettingsToggleButton(),
                   ],
                 ),
@@ -411,9 +410,9 @@ class SettingsToggleButton extends StatelessWidget {
 }
 
 class TtsMuteButton extends StatelessWidget {
-  final TtsAudioPlayer ttsAudioPlayer;
+  final TtsCubit ttsCubit;
 
-  const TtsMuteButton({super.key, required this.ttsAudioPlayer});
+  const TtsMuteButton({super.key, required this.ttsCubit});
 
   @override
   Widget build(BuildContext context) {
@@ -424,7 +423,7 @@ class TtsMuteButton extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             HapticFeedback.lightImpact();
-            ttsAudioPlayer.toggleMute();
+            ttsCubit.toggleMute();
             setState(() {});
           },
           child: Container(
@@ -439,7 +438,7 @@ class TtsMuteButton extends StatelessWidget {
               ),
             ),
             child: Icon(
-              ttsAudioPlayer.isMuted ? Icons.volume_off : Icons.volume_up,
+              ttsCubit.state.isMuted ? Icons.volume_off : Icons.volume_up,
               color: isDark ? AppColors.darkInkLight : AppColors.inkLight,
               size: 20,
             ),
@@ -452,8 +451,15 @@ class TtsMuteButton extends StatelessWidget {
 
 class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
   final PageController _pageController = PageController();
-  final _ttsAudioPlayer = TtsAudioPlayer();
+  late final TtsCubit _ttsCubit;
   int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ttsCubit = di.getIt<TtsCubit>();
+    context.read<ManuscriptBloc>().add(const LoadManuscriptPages());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -463,7 +469,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
       body: BlocListener<SettingsCubit, SettingsState>(
         listenWhen: (prev, curr) => prev.language != curr.language,
         listener: (context, state) {
-          _ttsAudioPlayer.stop();
+          _ttsCubit.stop();
           _currentPage = 0;
           _pageController.jumpToPage(0);
           context.read<ManuscriptBloc>().add(
@@ -479,15 +485,9 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
 
   @override
   void dispose() {
-    _ttsAudioPlayer.stop();
+    _ttsCubit.stop();
     _pageController.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<ManuscriptBloc>().add(const LoadManuscriptPages());
   }
 
   Widget _buildBody(ManuscriptState state) {
@@ -503,7 +503,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
         onPageChanged: _onPageChanged,
         onLike: _onLike,
         onShare: _sharePage,
-        ttsAudioPlayer: _ttsAudioPlayer,
+        ttsCubit: _ttsCubit,
       ),
       _ => const LoadingWidget(),
     };
@@ -516,7 +516,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
 
   void _onPageChanged(int index) {
     if (index != _currentPage) {
-      _ttsAudioPlayer.stop();
+      _ttsCubit.stop();
     }
     setState(() => _currentPage = index);
     final state = context.read<ManuscriptBloc>().state;
@@ -524,14 +524,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
       final page = state.pages[index];
       final settingsState = context.read<SettingsCubit>().state;
       if (settingsState.ttsReaderEnabled) {
-        final ttsService = di.getIt<TtsService>();
-        final filePath = ttsService.getFilePath(
-          page.id,
-          settingsState.language,
-        );
-        if (filePath != null) {
-          _ttsAudioPlayer.play(filePath);
-        }
+        _ttsCubit.play(page.id, settingsState.language);
       }
     }
   }

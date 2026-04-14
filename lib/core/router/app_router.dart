@@ -1,9 +1,10 @@
+import 'package:art_of_deal_war/features/manuscript/domain/usecases/tts_usecases.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:art_of_deal_war/core/theme/settings_cubit.dart';
-import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_event.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/pages/intro_cover_page.dart';
@@ -25,7 +26,7 @@ final GoRouter appRouter = GoRouter(
         final language = '${locale.languageCode}-${locale.countryCode ?? ''}';
         return BlocProvider(
           create: (context) => IntroBloc(
-            repository: di.getIt<ManuscriptRepository>(),
+            ttsCubit: di.getIt<TtsCubit>(),
           )..add(InitializeIntro(language: language)),
           child: IntroCoverPage(
             onEnter: () => context.go(_home),

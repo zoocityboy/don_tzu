@@ -4,11 +4,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:art_of_deal_war/core/services/background_music_player.dart';
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_state.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/manuscript_page_card.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/audio_music_cubit.dart';
+import 'package:art_of_deal_war/injection_container.dart' as di;
 
 const Duration kIntroAnimationDuration = Duration(milliseconds: 1000);
 
@@ -23,11 +24,12 @@ class IntroCoverPage extends StatefulWidget {
 
 class _IntroCoverPageState extends State<IntroCoverPage> {
   bool _showContent = false;
-  final _audioPlayer = BackgroundMusicPlayer();
+  late final AudioMusicCubit _audioMusicCubit;
 
   @override
   void initState() {
     super.initState();
+    _audioMusicCubit = di.getIt<AudioMusicCubit>();
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) setState(() => _showContent = true);
     });
@@ -36,7 +38,7 @@ class _IntroCoverPageState extends State<IntroCoverPage> {
   void _handleEnter(IntroState state) {
     if (state is! IntroReady) return;
     HapticFeedback.mediumImpact();
-    _audioPlayer.play('sound/walen-lonely-samurai.mp3');
+    _audioMusicCubit.play('sound/walen-lonely-samurai.mp3');
     widget.onEnter();
   }
 
