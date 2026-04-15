@@ -1,6 +1,7 @@
+import 'dart:async';
+
+import 'package:art_of_deal_war/features/settings/data/datasources/settings_local_datasource.dart';
 import 'package:art_of_deal_war/features/settings/domain/entities/user_settings.dart';
-import 'package:art_of_deal_war/features/settings/presentation/cubit/audio_music_cubit.dart';
-import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
 import 'package:art_of_deal_war/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,9 +41,8 @@ class SettingsState {
 }
 
 class SettingsCubit extends Cubit<SettingsState> {
-  final AudioMusicCubit _audioMusicCubit;
-  final TtsCubit _ttsCubit;
-  final UserSettings _settings;
+  final SettingsLocalDataSource _settingsStorage;
+  late final StreamSubscription<dynamic> _settingsSubscription;
 
   /// Get supported languages from AppLocalizations - dynamically from supported locales
   static List<Map<String, String>> get supportedLanguages {
@@ -75,59 +75,60 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
-  SettingsCubit({
-    required AudioMusicCubit audioMusicCubit,
-    required TtsCubit ttsCubit,
-    UserSettings? settings,
-  }) : _audioMusicCubit = audioMusicCubit,
-       _ttsCubit = ttsCubit,
-       _settings = settings ?? UserSettings.defaultSettings,
-       super(const SettingsState()) {
-    _loadFromSettings();
+  SettingsCubit({required SettingsLocalDataSource settingsStorage})
+    : _settingsStorage = settingsStorage,
+      super(_toState(settingsStorage.readSettings())) {
+    _settingsSubscription = _settingsStorage.watch().listen((_) {
+      _syncFromStorage();
+    });
   }
 
-  void _loadFromSettings() {
-    emit(
-      SettingsState(
-        themeMode: _settings.themeMode,
-        backgroundMusicEnabled: _settings.backgroundMusicEnabled,
-        ttsReaderEnabled: _settings.ttsReaderEnabled,
-        language: _settings.language,
-      ),
+  static SettingsState _toState(UserSettings settings) {
+    return SettingsState(
+      themeMode: settings.themeMode,
+      backgroundMusicEnabled: settings.backgroundMusicEnabled,
+      ttsReaderEnabled: settings.ttsReaderEnabled,
+      language: settings.language,
     );
-    _applySettings();
   }
 
-  void _applySettings() {
-    if (state.backgroundMusicEnabled) {
-      _audioMusicCubit.play('sound/walen-lonely-samurai.mp3');
+  void _syncFromStorage() {
+    final nextState = _toState(_settingsStorage.readSettings());
+    if (nextState.themeMode == state.themeMode &&
+        nextState.backgroundMusicEnabled == state.backgroundMusicEnabled &&
+        nextState.ttsReaderEnabled == state.ttsReaderEnabled &&
+        nextState.language == state.language) {
+      return;
     }
+    emit(nextState);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
+    await _settingsStorage.setThemeMode(mode);
     emit(state.copyWith(themeMode: mode));
   }
 
   Future<void> setBackgroundMusic(bool enabled) async {
+    await _settingsStorage.setBackgroundMusicEnabled(enabled);
     emit(state.copyWith(backgroundMusicEnabled: enabled));
-    if (enabled) {
-      await _audioMusicCubit.play('sound/walen-lonely-samurai.mp3');
-    } else {
-      await _audioMusicCubit.stop();
-    }
   }
 
   Future<void> setTtsReader(bool enabled) async {
+    await _settingsStorage.setTtsReaderEnabled(enabled);
     emit(state.copyWith(ttsReaderEnabled: enabled));
-    _ttsCubit.toggleMute(
-      enabled: !enabled,
-    ); // toggleMute with enabled=true mutes
   }
 
   Future<bool> setLanguage(String languageCode) async {
+    await _settingsStorage.setLanguage(languageCode);
     emit(state.copyWith(language: languageCode));
     return true;
   }
 
   bool get ttsReaderEnabled => state.ttsReaderEnabled;
+
+  @override
+  Future<void> close() async {
+    await _settingsSubscription.cancel();
+    return super.close();
+  }
 }

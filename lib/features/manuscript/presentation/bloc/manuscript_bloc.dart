@@ -2,15 +2,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:art_of_deal_war/core/services/app_logger.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/usecases/get_manuscript_pages_usecase.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/usecases/manuscript_usecases.dart';
-import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
-import 'package:art_of_deal_war/core/services/tts_text_model.dart';
 import 'manuscript_event.dart';
 import 'manuscript_state.dart';
 
 class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
   final GetManuscriptPagesUseCase _getManuscriptPagesUseCase;
   final ToggleLikeUseCase _toggleLikeUseCase;
-  final TtsCubit _ttsCubit;
 
   @override
   void onChange(Change<ManuscriptState> change) {
@@ -23,10 +20,8 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
   ManuscriptBloc({
     required GetManuscriptPagesUseCase getManuscriptPagesUseCase,
     required ToggleLikeUseCase toggleLikeUseCase,
-    required TtsCubit ttsCubit,
   }) : _getManuscriptPagesUseCase = getManuscriptPagesUseCase,
        _toggleLikeUseCase = toggleLikeUseCase,
-       _ttsCubit = ttsCubit,
        super(const ManuscriptInitial()) {
     on<LoadManuscriptPages>(_onLoadManuscriptPages);
     on<ToggleLike>(_onToggleLike);
@@ -40,11 +35,6 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
     try {
       final language = event.language ?? 'en';
       final pages = await _getManuscriptPagesUseCase.call(language);
-
-      final texts = pages
-          .map((p) => TtsTextModel(id: p.id, text: p.quote, language: language))
-          .toList();
-      await _ttsCubit.generateForLanguage(language, texts);
       emit(ManuscriptLoaded(pages: pages));
     } on Exception catch (e) {
       emit(ManuscriptError(e.toString()));
@@ -68,9 +58,7 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
         }).toList();
 
         emit(currentState.copyWith(pages: updatedPages));
-      } on Exception {
-        // Silently fail - don't disrupt the user experience
-      }
+      } on Exception {}
     }
   }
 }

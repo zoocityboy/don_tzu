@@ -18,7 +18,6 @@ dependencies:
   flutter_bloc: ^9.1.0
   flutter_localizations:
     sdk: flutter
-  flutter_tts: ^4.2.0
   get_it: ^8.0.3
   go_router: ^15.1.0
   google_fonts: ^6.2.1
@@ -47,13 +46,8 @@ flutter:
     - assets/images/
     - assets/backgrounds/
     - assets/sound/
-    - assets/data/en/
-    - assets/data/de/
-    - assets/data/hu/
-    - assets/data/pl/
-    - assets/data/sk/
-    - assets/data/ja/
-    - assets/data/zh/
+    - assets/tts/
+    - assets/quotes/
 
 # Configuration for flutter_launcher_icons
 flutter_icons:

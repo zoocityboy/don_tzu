@@ -4,13 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
-import 'package:art_of_deal_war/core/services/tts_text_model.dart';
 import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
-import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_event.dart';
-import 'package:art_of_deal_war/injection_container.dart' as di;
 
 class SettingsBottomSheet extends StatelessWidget {
   final bool showCloseButton;
@@ -180,60 +176,6 @@ class SettingsBottomSheet extends StatelessWidget {
   Future<void> _onLanguageTap(BuildContext context, String languageCode) async {
     HapticFeedback.selectionClick();
     final settingsCubit = context.read<SettingsCubit>();
-    final ttsCubit = di.getIt<TtsCubit>();
-    final repository = di.getIt<ManuscriptRepository>();
-
-    final chapters = repository.getChaptersForTts(languageCode);
-
-    if (chapters.isNotEmpty) {
-      final dialogContext = context;
-      showDialog<void>(
-        context: dialogContext,
-        barrierDismissible: false,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: Theme.of(dialogContext).brightness == Brightness.dark
-              ? AppColors.darkPaperBase
-              : AppColors.paperBase,
-          title: Text(
-            'Generating Audio',
-            style: GoogleFonts.notoSerif(color: AppColors.inkBlack),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(color: AppColors.vermillion),
-              const SizedBox(height: 16),
-              Text(
-                'Generating TTS audio for ${languageCode.toUpperCase()}...',
-                style: GoogleFonts.notoSansJp(color: AppColors.inkGray),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      try {
-        final texts = chapters
-            .map(
-              (e) => TtsTextModel(
-                id: e.key,
-                text: e.value,
-                language: languageCode,
-              ),
-            )
-            .toList();
-
-        await ttsCubit.generateForLanguage(languageCode, texts);
-
-        if (dialogContext.mounted) {
-          Navigator.of(dialogContext).pop();
-        }
-      } on Exception {
-        if (dialogContext.mounted) {
-          Navigator.of(dialogContext).pop();
-        }
-      }
-    }
 
     await settingsCubit.setLanguage(languageCode);
 
@@ -419,10 +361,7 @@ class _SettingsToggle extends StatelessWidget {
               ),
               Text(
                 subtitle,
-                style: GoogleFonts.notoSansJp(
-                  fontSize: 12,
-                  color: subColor,
-                ),
+                style: GoogleFonts.notoSansJp(fontSize: 12, color: subColor),
               ),
             ],
           ),

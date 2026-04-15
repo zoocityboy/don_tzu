@@ -3,13 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/intro_event.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/pages/intro_cover_page.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/pages/manuscript_feed_page.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/settings_bottom_sheet.dart';
-import 'package:art_of_deal_war/injection_container.dart' as di;
 
 const String _intro = '/intro';
 const String _home = '/';
@@ -24,12 +22,9 @@ final GoRouter appRouter = GoRouter(
         final locale = Localizations.localeOf(context);
         final language = '${locale.languageCode}-${locale.countryCode ?? ''}';
         return BlocProvider(
-          create: (context) => IntroBloc(
-            ttsCubit: di.getIt<TtsCubit>(),
-          )..add(InitializeIntro(language: language)),
-          child: IntroCoverPage(
-            onEnter: () => context.go(_home),
-          ),
+          create: (context) =>
+              IntroBloc()..add(InitializeIntro(language: language)),
+          child: IntroCoverPage(onEnter: () => context.go(_home)),
         );
       },
     ),

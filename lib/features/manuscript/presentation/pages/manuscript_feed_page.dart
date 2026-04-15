@@ -1,19 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
-
 import 'package:art_of_deal_war/core/theme/app_theme.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_bloc.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_event.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/bloc/manuscript_state.dart';
 import 'package:art_of_deal_war/features/manuscript/presentation/widgets/manuscript_page_card.dart';
+import 'package:art_of_deal_war/features/manuscript/presentation/widgets/settings_bottom_sheet.dart';
 import 'package:art_of_deal_war/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
-import 'package:art_of_deal_war/features/manuscript/presentation/widgets/settings_bottom_sheet.dart';
 import 'package:art_of_deal_war/injection_container.dart' as di;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ActionBarWidget extends StatelessWidget {
   final ManuscriptPage page;
@@ -257,13 +256,6 @@ class ManuscriptErrorWidget extends StatelessWidget {
   }
 }
 
-class ManuscriptFeedPage extends StatefulWidget {
-  const ManuscriptFeedPage({super.key});
-
-  @override
-  State<ManuscriptFeedPage> createState() => _ManuscriptFeedPageState();
-}
-
 class PageContentWidget extends StatefulWidget {
   final ManuscriptPage page;
   final VoidCallback onLike;
@@ -303,10 +295,7 @@ class _PageContentWidgetState extends State<PageContentWidget> {
           children: [
             PaperTextureWidget(isDark: isDark),
             AgedEdgesWidget(isDark: isDark),
-            AnimatedCharacterImageWidget(
-              page: widget.page,
-              isDark: isDark,
-            ),
+            AnimatedCharacterImageWidget(page: widget.page, isDark: isDark),
             SafeArea(
               child: AnimatedTextContentWidget(
                 title: widget.page.title,
@@ -418,13 +407,13 @@ class TtsMuteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return StatefulBuilder(
-      builder: (context, setState) {
+    return BlocBuilder<TtsCubit, TtsState>(
+      bloc: ttsCubit,
+      builder: (context, state) {
         return GestureDetector(
-          onTap: () {
+          onTap: () async {
             HapticFeedback.lightImpact();
-            ttsCubit.toggleMute();
-            setState(() {});
+            await ttsCubit.toggleMute();
           },
           child: Container(
             padding: const EdgeInsets.all(8),
@@ -438,7 +427,7 @@ class TtsMuteButton extends StatelessWidget {
               ),
             ),
             child: Icon(
-              ttsCubit.state.isMuted ? Icons.volume_off : Icons.volume_up,
+              state.isMuted ? Icons.volume_off : Icons.volume_up,
               color: isDark ? AppColors.darkInkLight : AppColors.inkLight,
               size: 20,
             ),
@@ -447,6 +436,13 @@ class TtsMuteButton extends StatelessWidget {
       },
     );
   }
+}
+
+class ManuscriptFeedPage extends StatefulWidget {
+  const ManuscriptFeedPage({super.key});
+
+  @override
+  State<ManuscriptFeedPage> createState() => _ManuscriptFeedPageState();
 }
 
 class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {

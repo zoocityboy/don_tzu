@@ -82,8 +82,14 @@ class App extends StatelessWidget {
         builder: (context, settings) {
           final themeMode = settings.themeMode;
           final currentLocale = PlatformDispatcher.instance.locale;
+          final selectedLocale = Locale(settings.language);
           final locale =
-              AppLocalizations.supportedLocales.contains(currentLocale)
+              AppLocalizations.supportedLocales.any(
+                (supportedLocale) =>
+                    supportedLocale.languageCode == selectedLocale.languageCode,
+              )
+              ? selectedLocale
+              : AppLocalizations.supportedLocales.contains(currentLocale)
               ? currentLocale
               : const Locale('en');
 
