@@ -1,0 +1,22 @@
+[
+  {"id": 1, "title": "Kapitola I - Totális győzelem", "quote": "A cél a totális győzelem, és annyit fogunk nyerni, hogy elfáradsz a nyerésbe. Sokan mondják.", "image": "assets/images/1.webp"},
+  {"id": 2, "title": "Kapitola II - Ismerd meg ellened", "quote": "Mindig ismerd meg ellenedet, különösen a hamis híreket terjesztő médiát.", "image": "assets/images/2.webp"},
+  {"id": 3, "title": "Kapitola III - Erős parancsnok", "quote": "A bölcs parancsnok erősnek tartja csapatait a legjobb felszereléssel.", "image": "assets/images/3.webp"},
+  {"id": 4, "title": "Kapitola IV - A fal", "quote": "Építs egy falat. Egy hatalmas fal. A rosszfiúkat kint tartja.", "image": "assets/images/4.webp"},
+  {"id": 5, "title": "Kapitola V - Stabilis tábornok", "quote": "A stabilis tábornoknak nagyon jó agya van.", "image": "assets/images/5.webp"},
+  {"id": 6, "title": "Kapitola VI - A legjobb üzlet", "quote": "Ha üzletet kötsz, kösd a történelem legjobb üzletét.", "image": "assets/images/6.webp"},
+  {"id": 7, "title": "Kapitola VII - Ignore a gyűlölködőket", "quote": "A kritika az ételük a gyűlölködőknek. Ne törődj velük.", "image": "assets/images/7.webp"},
+  {"id": 8, "title": "Kapitola VIII - Ellentámadás", "quote": "Ha támadnak a közösségi médiában, használd a szavaidat.", "image": "assets/images/8.webp"},
+  {"id": 9, "title": "Kapitola IX - Túlnyomó erő", "quote": "Legyél olyan erős, hogy senki se merjen támadni.", "image": "assets/images/9.webp"},
+  {"id": 10, "title": "Kapitola X - Külföldi parancsnokok", "quote": "Ne bízz a külföldi paracsoknokokban.", "image": "assets/images/10.webp"},
+  {"id": 11, "title": "Kapitola XI - Tömeget vonzani", "quote": "Az igazi vezető tudja, hogyan vonzza a tömeget.", "image": "assets/images/11.webp"},
+  {"id": 12, "title": "Kapitola XII - Hamis terep", "quote": "Ha a terep nem tetszik, nyilvánitsd hamisnak.", "image": "assets/images/12.webp"},
+  {"id": 13, "title": "Kapitola XIII - A legjobb ötlet", "quote": "Ha van ötleted, mindenki tudja, hogy a tiéd.", "image": "assets/images/13.webp"},
+  {"id": 14, "title": "Kapitola XIV - Erőt spórolni", "quote": "Spórolj az erődet a nagy gyűlésekre.", "image": "assets/images/14.webp"},
+  {"id": 15, "title": "Kapitola XV - Erős kézfogás", "quote": "Használj erős kézfogást, hogy megmutasd, ki a legerősebb.", "image": "assets/images/15.webp"},
+  {"id": 16, "title": "Kapitola XVI - Jó emberek", "quote": "Emlékezz, hogy mindkét oldalon jó emberek vannak.", "image": "assets/images/16.webp"},
+  {"id": 17, "title": "Kapitola XVII - A mocsarat lecsapolni", "quote": "Ha a tábornok korrupt, le kell csapolni a mocsarat.", "image": "assets/images/17.webp"},
+  {"id": 18, "title": "Kapitola XVIII - SzabályokatIgnore", "quote": "Néha a stratégia azt jelenti, hogyIGNORE a szabályokat.", "image": "assets/images/18.webp"},
+  {"id": 19, "title": "Kapitola XIX - Nagyszerű márka", "quote": "Igazán nagyszerű parancsnok egy márka.", "image": "assets/images/19.webp"},
+  {"id": 20, "title": "Kapitola XX - Stabilis zseni", "quote": "Ne kérdezd a bölcs vezető intelligenciáját.", "image": "assets/images/20.webp"}
+]

@@ -23,7 +23,7 @@ class SettingsBottomSheet extends StatelessWidget {
   });
 
   static void show(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -114,7 +114,6 @@ class SettingsBottomSheet extends StatelessWidget {
     required Widget child,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? AppColors.darkInkLight : AppColors.inkBlack;
     final subColor = isDark ? AppColors.darkInkGray : AppColors.inkGray;
 
     return Padding(
@@ -141,7 +140,6 @@ class SettingsBottomSheet extends StatelessWidget {
   Widget _buildLanguageSelector(BuildContext context, SettingsState state) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedColor = isDark ? AppColors.darkInkLight : AppColors.inkBlack;
-    final unselectedColor = isDark ? AppColors.darkInkGray : AppColors.inkGray;
 
     return Wrap(
       spacing: 8,
@@ -189,7 +187,7 @@ class SettingsBottomSheet extends StatelessWidget {
 
     if (chapters.isNotEmpty) {
       final dialogContext = context;
-      showDialog(
+      showDialog<void>(
         context: dialogContext,
         barrierDismissible: false,
         builder: (dialogContext) => AlertDialog(

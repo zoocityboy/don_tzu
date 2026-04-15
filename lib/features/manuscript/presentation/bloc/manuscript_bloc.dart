@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:art_of_deal_war/core/services/app_logger.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/usecases/get_manuscript_pages_usecase.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/usecases/manuscript_usecases.dart';
 import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
@@ -15,7 +15,7 @@ class ManuscriptBloc extends Bloc<ManuscriptEvent, ManuscriptState> {
   @override
   void onChange(Change<ManuscriptState> change) {
     super.onChange(change);
-    debugPrint(
+    AppLogger.debug(
       'ManuscriptBloc state changed: ${change.currentState} -> ${change.nextState}',
     );
   }

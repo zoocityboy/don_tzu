@@ -1,4 +1,3 @@
-import 'package:art_of_deal_war/core/services/pocketbase_service.dart';
 import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_datasource.dart';
 import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_remote_datasource.dart';
 import 'package:art_of_deal_war/features/manuscript/data/repositories/manuscript_repository_impl.dart';
@@ -15,15 +14,12 @@ import 'package:get_it/get_it.dart';
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
-  final pbService = await PocketBaseService.getInstance();
-  getIt.registerLazySingleton<PocketBaseService>(() => pbService);
-
-  getIt.registerFactory<TtsCubit>(() => TtsCubit());
+  // TtsCubit must be a singleton - all components share the same instance
+  getIt.registerLazySingleton<TtsCubit>(() => TtsCubit());
   getIt.registerLazySingleton<AudioMusicCubit>(() => AudioMusicCubit());
 
   getIt.registerLazySingleton<ManuscriptLocalDataSource>(
     () => ManuscriptRemoteDataSource(
-      pocketBaseService: pbService,
       ttsCubit: getIt<TtsCubit>(),
     ),
   );

@@ -1,5 +1,5 @@
+import 'package:art_of_deal_war/core/services/app_logger.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AudioMusicState {
@@ -20,6 +20,11 @@ class AudioMusicState {
       isMuted: isMuted ?? this.isMuted,
     );
   }
+
+  @override
+  String toString() {
+    return 'AudioMusicState(isPlaying: $isPlaying, isMuted: $isMuted)';
+  }
 }
 
 class AudioMusicCubit extends Cubit<AudioMusicState> {
@@ -37,9 +42,9 @@ class AudioMusicCubit extends Cubit<AudioMusicState> {
       await _player.setVolume(0.2);
       await _player.play(AssetSource(filePath));
       emit(state.copyWith(isPlaying: true));
-      debugPrint('Background music started: $filePath');
+      AppLogger.info('Background music started: $filePath');
     } catch (e) {
-      debugPrint('Error playing audio: $e');
+      AppLogger.error('Error playing audio', e);
     }
   }
 

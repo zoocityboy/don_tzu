@@ -1,0 +1,169 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Chinese (`zh`).
+class AppLocalizationsZh extends AppLocalizations {
+  AppLocalizationsZh([String locale = 'zh']) : super(locale);
+
+  @override
+  String get appTitle => '交易战争的艺术';
+
+  @override
+  String get introSubtitle => '2500年的发现';
+
+  @override
+  String get openTheScroll => '打开卷轴';
+
+  @override
+  String get storyParagraph1 =>
+      '2024年，考古学家在亚利桑那州的沙漠中发现了一个密封的保险库，里面装有公元前250年的古代军事卷轴。';
+
+  @override
+  String get storyParagraph2 => '其中包括《交易战争的艺术》- 由总司令官孙子撰写的战略军事论文。';
+
+  @override
+  String get storyParagraph3 => '直到现在，这些页面仍然对公众保密...';
+
+  @override
+  String get like => '喜欢';
+
+  @override
+  String get liked => '已喜欢';
+
+  @override
+  String get share => '分享';
+
+  @override
+  String shareText(Object quote, Object title) {
+    return '$title\n\n「$quote」\n\n— 交易战争的艺术\n\n来自交易战争应用';
+  }
+
+  @override
+  String get cacheCleared => '缓存已清除！';
+
+  @override
+  String get errorLoading => '加载内容失败';
+
+  @override
+  String get chapter1Title => '第一章 - 完全胜利';
+
+  @override
+  String get chapter1Quote => '目标是完全胜利，我们会赢很多。你会厌倦胜利。很多人都在说。';
+
+  @override
+  String get chapter2Title => '第二章 - 了解你的敌人';
+
+  @override
+  String get chapter2Quote => '永远了解你的敌人，特别是假新闻媒体，因为他们非常不公平。';
+
+  @override
+  String get chapter3Title => '第三章 - 强大的指挥官';
+
+  @override
+  String get chapter3Quote => '明智的指挥官用最好的装备和最高的报酬保持部队强大。';
+
+  @override
+  String get chapter4Title => '第四章 - 墙壁';
+
+  @override
+  String get chapter4Quote => '建造一堵墙。一堵巨大的墙。它阻止坏人进入，并让邻居付款。';
+
+  @override
+  String get chapter5Title => '第五章 - 稳定的将军';
+
+  @override
+  String get chapter5Quote => '稳定的将军有一个非常好的大脑，可能是整个军队中最好的大脑。';
+
+  @override
+  String get chapter6Title => '第六章 - 最好的交易';
+
+  @override
+  String get chapter6Quote => '当你做交易时，做历史上最好的交易。否则，你是一个失败者。';
+
+  @override
+  String get chapter7Title => '第七章 - 忽略批评者';
+
+  @override
+  String get chapter7Quote => '批评是批评者的食物。不要理他们。';
+
+  @override
+  String get chapter8Title => '第八章 - 反击';
+
+  @override
+  String get chapter8Quote => '如果在社交媒体上受到攻击，用你的话反击回去。';
+
+  @override
+  String get chapter9Title => '第九章 - 压倒性力量';
+
+  @override
+  String get chapter9Quote => '为了避免战争，要强大到没有人敢攻击你。';
+
+  @override
+  String get chapter10Title => '第十章 - 外国指挥官';
+
+  @override
+  String get chapter10Quote => '不要相信外国指挥官，因为他们正在杀死我们的贸易并窃取我们的工作。';
+
+  @override
+  String get chapter11Title => '第十一章 - 吸引人群';
+
+  @override
+  String get chapter11Quote => '真正的领导者知道如何吸引人群，更大的 crowd 总是更好的指挥官的标志。';
+
+  @override
+  String get chapter12Title => '第十二章 - 假地形';
+
+  @override
+  String get chapter12Quote => '如果地面不合你的心意，宣布它是假地形。';
+
+  @override
+  String get chapter13Title => '第十三章 - 最好的主意';
+
+  @override
+  String get chapter13Quote => '当你有一个主意时，确保每个人都知道这是你的主意。';
+
+  @override
+  String get chapter14Title => '第十四章 - 保存力量';
+
+  @override
+  String get chapter14Quote => '避免小型不必要的冲突。为大型集会保存力量。';
+
+  @override
+  String get chapter15Title => '第十五章 - 强有力的握手';
+
+  @override
+  String get chapter15Quote => '当外交官失败时，使用强有力的握手来显示谁是最强的。';
+
+  @override
+  String get chapter16Title => '第十六章 - 好人';
+
+  @override
+  String get chapter16Quote => '在冲突时期，记得两边都有好人。';
+
+  @override
+  String get chapter17Title => '第十七章 - 排干沼泽';
+
+  @override
+  String get chapter17Quote => '当将军腐败时，你必须排干沼泽。';
+
+  @override
+  String get chapter18Title => '第十八章 - 忽略规则';
+
+  @override
+  String get chapter18Quote => '有时候，策略意味着承认规则不公平，然后忽略它们来获胜。';
+
+  @override
+  String get chapter19Title => '第十九章 - 伟大的品牌';
+
+  @override
+  String get chapter19Quote => '一个真正伟大的指挥官是一个品牌。';
+
+  @override
+  String get chapter20Title => '第二十章 - 稳定的天才';
+
+  @override
+  String get chapter20Quote => '不要质疑明智领袖的智慧，因为他是一个非常稳定的天才。';
+}

@@ -1,8 +1,9 @@
+import 'package:art_of_deal_war/features/settings/domain/entities/user_settings.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/audio_music_cubit.dart';
+import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
+import 'package:art_of_deal_war/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:art_of_deal_war/features/settings/domain/entities/user_settings.dart';
-import 'package:art_of_deal_war/features/settings/presentation/cubit/tts_cubit.dart';
-import 'package:art_of_deal_war/features/settings/presentation/cubit/audio_music_cubit.dart';
 
 class SettingsState {
   final ThemeMode themeMode;
@@ -31,6 +32,11 @@ class SettingsState {
       language: language ?? this.language,
     );
   }
+
+  @override
+  String toString() {
+    return 'SettingsState(themeMode: $themeMode, backgroundMusicEnabled: $backgroundMusicEnabled, ttsReaderEnabled: $ttsReaderEnabled, language: $language)';
+  }
 }
 
 class SettingsCubit extends Cubit<SettingsState> {
@@ -38,14 +44,36 @@ class SettingsCubit extends Cubit<SettingsState> {
   final TtsCubit _ttsCubit;
   final UserSettings _settings;
 
-  static const List<Map<String, String>> supportedLanguages = [
-    {'code': 'en', 'name': 'English'},
-    {'code': 'cs', 'name': 'Čeština'},
-    {'code': 'de', 'name': 'Deutsch'},
-    {'code': 'hu', 'name': 'Magyar'},
-    {'code': 'pl', 'name': 'Polski'},
-    {'code': 'sk', 'name': 'Slovenčina'},
-  ];
+  /// Get supported languages from AppLocalizations - dynamically from supported locales
+  static List<Map<String, String>> get supportedLanguages {
+    return AppLocalizations.supportedLocales.map((locale) {
+      final code = locale.languageCode;
+      return {'code': code, 'name': _getLanguageName(code)};
+    }).toList();
+  }
+
+  static String _getLanguageName(String code) {
+    switch (code) {
+      case 'en':
+        return 'English';
+      case 'cs':
+        return 'Čeština';
+      case 'de':
+        return 'Deutsch';
+      case 'hu':
+        return 'Magyar';
+      case 'pl':
+        return 'Polski';
+      case 'sk':
+        return 'Slovenčina';
+      case 'ja':
+        return '日本語';
+      case 'zh':
+        return '中文';
+      default:
+        return code;
+    }
+  }
 
   SettingsCubit({
     required AudioMusicCubit audioMusicCubit,
@@ -91,7 +119,9 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> setTtsReader(bool enabled) async {
     emit(state.copyWith(ttsReaderEnabled: enabled));
-    _ttsCubit.toggleMute();
+    _ttsCubit.toggleMute(
+      enabled: !enabled,
+    ); // toggleMute with enabled=true mutes
   }
 
   Future<bool> setLanguage(String languageCode) async {
