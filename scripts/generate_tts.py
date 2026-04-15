@@ -4,50 +4,62 @@ Generate TTS audio files for The Art of Deal War quotes.
 
 Usage:
     python scripts/generate_tts.py <language>
+    python scripts/generate_tts.py --all
 
 Example:
     python scripts/generate_tts.py en
     python scripts/generate_tts.py de
+    python scripts/generate_tts.py --all
 """
 
 import argparse
 import asyncio
 import json
-import os
 from pathlib import Path
 
 import edge_tts
+from edge_tts.exceptions import NoAudioReceived
 
 
-# Map language codes to edge-tts voice presets
-VOICE_MAP = {
-    "en": {"name": "en-US-AriaNeural", "locale": "en-US"},
-    "de": {"name": "de-DE-KatjaNeural", "locale": "de-DE"},
-    "hu": {"name": "hu-HU-NoemiNeural", "locale": "hu-HU"},
-    "pl": {"name": "pl-PL-AgnieszkaNeural", "locale": "pl-PL"},
-    "sk": {"name": "sk-SK-LukasNeural", "locale": "sk-SK"},
-    "ja": {"name": "ja-JP-NanamiNeural", "locale": "ja-JP"},
-    "zh": {"name": "zh-CN-XiaoxiaoNeural", "locale": "zh-CN"},
+# Map language codes to edge-tts voice names
+VOICE_MAP: dict[str, str] = {
+    "en": "en-US-GuyNeural",
+    "cs": "cs-CZ-AntoninNeural",
+    "de": "de-DE-ConradNeural",
+    "hu": "hu-HU-TamasNeural",
+    "pl": "pl-PL-MarekNeural",
+    "sk": "sk-SK-LukasNeural",
+    "ja": "ja-JP-KeitaNeural",
+    "zh": "zh-CN-YunxiNeural",
 }
 
+_DEFAULT_VOICE = "en-US-GuyNeural"
+_MAX_CONCURRENT = 3
 
-async def generate_audio(text: str, output_path: str, voice_name: str) -> bool:
-    """Generate audio file from text using edge-tts."""
-    try:
-        communicate = edge_tts.Communicate(
-            text, voice_name, rate="-10%", pitch="-20Hz", volume="+0%"
-        )
-        await communicate.save(output_path)
-        return True
-    except Exception as e:
-        print(f"Error generating {output_path}: {e}")
-        return False
+
+async def generate_audio(
+    text: str, output_path: str, voice_name: str, semaphore: asyncio.Semaphore
+) -> bool:
+    """Generate a single audio file from text using edge-tts."""
+    async with semaphore:
+        try:
+            communicate = edge_tts.Communicate(
+                text, voice_name, rate="-10%", pitch="-20Hz"
+            )
+            await communicate.save(output_path)
+            return True
+        except NoAudioReceived as e:
+            print(f"No audio received for {output_path}: {e}")
+            return False
+        except Exception as e:
+            print(f"Error generating {output_path}: {e}")
+            return False
 
 
 async def generate_language(
     lang: str, data_dir: Path, output_dir: Path
 ) -> tuple[int, int]:
-    """Generate all audio files for a language."""
+    """Generate all audio files for a language concurrently."""
     quotes_file = data_dir / lang / "quotes.json"
 
     if not quotes_file.exists():
@@ -57,61 +69,82 @@ async def generate_language(
     with open(quotes_file, "r", encoding="utf-8") as f:
         quotes = json.load(f)
 
-    voice = VOICE_MAP.get(lang, {"name": "en-US-AriaNeural", "locale": "en-US"})
+    voice_name = VOICE_MAP.get(lang, _DEFAULT_VOICE)
 
     # Create output directory if it doesn't exist
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    success_count = 0
-    fail_count = 0
+    semaphore = asyncio.Semaphore(_MAX_CONCURRENT)
 
-    for item in quotes:
+    async def process(item: dict) -> bool | None:
         quote_id = item["id"]
-        text = item["quote"]
         output_file = output_dir / f"{quote_id}.mp3"
 
-        # Skip if file already exists
         if output_file.exists():
             print(f"Skipping {quote_id}.mp3 (already exists)")
-            continue
+            return None  # skipped
 
         print(f"Generating {lang}/{quote_id}.mp3...")
-
-        if await generate_audio(text, str(output_file), voice["name"]):
-            success_count += 1
+        result = await generate_audio(item["quote"], str(output_file), voice_name, semaphore)
+        if result:
             print(f"  ✓ Generated: {quote_id}.mp3")
         else:
-            fail_count += 1
             print(f"  ✗ Failed: {quote_id}.mp3")
+        return result
 
+    results = await asyncio.gather(*(process(item) for item in quotes))
+    success_count = sum(1 for r in results if r is True)
+    fail_count = sum(1 for r in results if r is False)
     return success_count, fail_count
 
 
 async def main():
     parser = argparse.ArgumentParser(description="Generate TTS audio files for quotes")
-    parser.add_argument("language", help="Language code (e.g., en, de, hu)")
+    parser.add_argument(
+        "language",
+        nargs="?",
+        help="Language code (e.g., en, de, hu). Required unless --all is set.",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Generate audio for all supported languages.",
+    )
     parser.add_argument(
         "--data-dir",
-        default="assets/data",
+        default="_data/lang",
         help="Data directory with quotes.json files",
     )
     parser.add_argument(
-        "--output-dir", default="assets/tts", help="Output directory for audio files"
+        "--output-dir", default="_data/tts", help="Output directory for audio files"
     )
     args = parser.parse_args()
 
-    lang = args.language
+    if not args.all and not args.language:
+        parser.error("Provide a language code or use --all.")
+
     data_dir = Path(args.data_dir)
-    output_dir = Path(args.output_dir) / lang
+    base_output_dir = Path(args.output_dir)
+    langs = list(VOICE_MAP.keys()) if args.all else [args.language]
 
-    print(f"Generating TTS for language: {lang}")
-    print(f"Output directory: {output_dir}")
-    print("---")
+    total_success = 0
+    total_failed = 0
 
-    success, failed = await generate_language(lang, data_dir, output_dir)
+    for lang in langs:
+        print(f"Generating TTS for language: {lang}")
+        print(f"Output directory: {base_output_dir / lang}")
+        print("---")
 
-    print("---")
-    print(f"Done! Generated: {success}, Failed: {failed}")
+        success, failed = await generate_language(lang, data_dir, base_output_dir / lang)
+        total_success += success
+        total_failed += failed
+
+        print("---")
+        print(f"[{lang}] Generated: {success}, Failed: {failed}")
+        print()
+
+    if args.all:
+        print(f"Total — Generated: {total_success}, Failed: {total_failed}")
 
 
 if __name__ == "__main__":
