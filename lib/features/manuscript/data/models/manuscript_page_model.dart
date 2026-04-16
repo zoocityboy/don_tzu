@@ -19,11 +19,15 @@ class ManuscriptPageModel extends HiveObject {
   @HiveField(4)
   bool isLiked;
 
+  @HiveField(5)
+  final String audio;
+
   ManuscriptPageModel({
     required this.id,
     required this.title,
     required this.quote,
     required this.imageAsset,
+    required this.audio,
     this.isLiked = false,
   });
 
@@ -33,12 +37,14 @@ class ManuscriptPageModel extends HiveObject {
     String? quote,
     String? imageAsset,
     bool? isLiked,
+    String? audio,
   }) {
     return ManuscriptPageModel(
       id: id ?? this.id,
       title: title ?? this.title,
       quote: quote ?? this.quote,
       imageAsset: imageAsset ?? this.imageAsset,
+      audio: audio ?? this.audio,
       isLiked: isLiked ?? this.isLiked,
     );
   }

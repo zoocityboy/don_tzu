@@ -2,9 +2,13 @@
 
 part of 'manuscript_page_model.dart';
 
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
 class ManuscriptPageModelAdapter extends TypeAdapter<ManuscriptPageModel> {
   @override
-  final int typeId = 0;
+  final typeId = 0;
 
   @override
   ManuscriptPageModel read(BinaryReader reader) {
@@ -17,14 +21,15 @@ class ManuscriptPageModelAdapter extends TypeAdapter<ManuscriptPageModel> {
       title: fields[1] as String,
       quote: fields[2] as String,
       imageAsset: fields[3] as String,
-      isLiked: fields[4] as bool,
+      audio: fields[5] as String,
+      isLiked: fields[4] == null ? false : fields[4] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, ManuscriptPageModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -34,7 +39,9 @@ class ManuscriptPageModelAdapter extends TypeAdapter<ManuscriptPageModel> {
       ..writeByte(3)
       ..write(obj.imageAsset)
       ..writeByte(4)
-      ..write(obj.isLiked);
+      ..write(obj.isLiked)
+      ..writeByte(5)
+      ..write(obj.audio);
   }
 
   @override

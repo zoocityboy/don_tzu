@@ -18,7 +18,9 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
-  final settingsBox = await Hive.openBox<dynamic>(SettingsLocalDataSource.boxName);
+  final settingsBox = await Hive.openBox<dynamic>(
+    SettingsLocalDataSource.boxName,
+  );
 
   getIt.registerLazySingleton<SettingsLocalDataSource>(
     () => SettingsLocalDataSource(settingsBox),

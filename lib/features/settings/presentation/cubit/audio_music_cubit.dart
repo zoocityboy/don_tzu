@@ -9,15 +9,9 @@ class AudioMusicState {
   final bool isPlaying;
   final bool isMuted;
 
-  const AudioMusicState({
-    this.isPlaying = false,
-    this.isMuted = false,
-  });
+  const AudioMusicState({this.isPlaying = false, this.isMuted = false});
 
-  AudioMusicState copyWith({
-    bool? isPlaying,
-    bool? isMuted,
-  }) {
+  AudioMusicState copyWith({bool? isPlaying, bool? isMuted}) {
     return AudioMusicState(
       isPlaying: isPlaying ?? this.isPlaying,
       isMuted: isMuted ?? this.isMuted,

@@ -426,10 +426,14 @@ class TtsMuteButton extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: Icon(
-              state.isMuted ? Icons.volume_off : Icons.volume_up,
-              color: isDark ? AppColors.darkInkLight : AppColors.inkLight,
-              size: 20,
+            child: BlocBuilder<SettingsCubit, SettingsState>(
+              builder: (context, state) {
+                return Icon(
+                  state.ttsReaderEnabled ? Icons.volume_up : Icons.volume_off,
+                  color: isDark ? AppColors.darkInkLight : AppColors.inkLight,
+                  size: 20,
+                );
+              },
             ),
           ),
         );
@@ -520,7 +524,7 @@ class _ManuscriptFeedPageState extends State<ManuscriptFeedPage> {
       final page = state.pages[index];
       final settingsState = context.read<SettingsCubit>().state;
       if (settingsState.ttsReaderEnabled) {
-        _ttsCubit.play(page.id, settingsState.language);
+        _ttsCubit.play(page.audioAsset);
       }
     }
   }

@@ -31,6 +31,9 @@ class ManuscriptLocalDataSourceImpl implements ManuscriptDataSource {
 
   String _getImageUrl(int id) => 'assets/images/$id.webp';
 
+  String _getAudioUrl(String language, int id) =>
+      'assets/tts/$language/$id.mp3';
+
   Future<Box> get _likedBox => Hive.openBox(_likedBoxName);
 
   @override
@@ -81,6 +84,7 @@ class ManuscriptLocalDataSourceImpl implements ManuscriptDataSource {
           title: map['title'] as String,
           quote: map['quote'] as String,
           imageAsset: _getImageUrl(map['id'] as int),
+          audio: _getAudioUrl(language, map['id'] as int),
         );
       }).toList();
     } catch (e) {

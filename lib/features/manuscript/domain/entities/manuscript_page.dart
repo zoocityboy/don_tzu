@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:equatable/equatable.dart';
 
 class ManuscriptPage extends Equatable {
@@ -6,6 +7,7 @@ class ManuscriptPage extends Equatable {
   final String quote;
   final String imageAsset;
   final bool isLiked;
+  final Source audioAsset;
 
   const ManuscriptPage({
     required this.id,
@@ -13,6 +15,7 @@ class ManuscriptPage extends Equatable {
     required this.quote,
     required this.imageAsset,
     this.isLiked = false,
+    required this.audioAsset,
   });
 
   ManuscriptPage copyWith({
@@ -21,6 +24,7 @@ class ManuscriptPage extends Equatable {
     String? quote,
     String? imageAsset,
     bool? isLiked,
+    Source? audio,
   }) {
     return ManuscriptPage(
       id: id ?? this.id,
@@ -28,9 +32,17 @@ class ManuscriptPage extends Equatable {
       quote: quote ?? this.quote,
       imageAsset: imageAsset ?? this.imageAsset,
       isLiked: isLiked ?? this.isLiked,
+      audioAsset: audio ?? this.audioAsset,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, quote, imageAsset, isLiked];
+  List<Object?> get props => [
+    id,
+    title,
+    quote,
+    imageAsset,
+    isLiked,
+    audioAsset,
+  ];
 }

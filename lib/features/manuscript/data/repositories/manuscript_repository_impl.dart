@@ -1,6 +1,7 @@
 import 'package:art_of_deal_war/features/manuscript/data/datasources/manuscript_datasource.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/entities/manuscript_page.dart';
 import 'package:art_of_deal_war/features/manuscript/domain/repositories/manuscript_repository.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class ManuscriptRepositoryImpl implements ManuscriptRepository {
   final ManuscriptDataSource _dataSource;
@@ -14,12 +15,16 @@ class ManuscriptRepositoryImpl implements ManuscriptRepository {
     _likedPageIds = await _dataSource.getLikedPageIds();
 
     return models.map((model) {
+      final source = model.audio.startsWith('http')
+          ? UrlSource(model.audio)
+          : AssetSource(model.audio.replaceAll('assets/', ''));
       return ManuscriptPage(
         id: model.id,
         title: model.title,
         quote: model.quote,
         imageAsset: model.imageAsset,
         isLiked: _likedPageIds.contains(model.id),
+        audioAsset: source,
       );
     }).toList();
   }

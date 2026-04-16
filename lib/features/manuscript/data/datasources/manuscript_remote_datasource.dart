@@ -10,7 +10,7 @@ const String _likedPageIdsKey = 'ids';
 
 class ManuscriptRemoteDataSourceImpl implements ManuscriptDataSource {
   static const String _baseUrl =
-      'https://raw.githubusercontent.com/zoocityboy/don-tzu/refs/heads/master/';
+      'https://github.com/zoocityboy/don-tzu/raw/refs/heads/main/';
   static const String _folder = '_data';
 
   final Map<String, List<ManuscriptPageModel>> _cache = {};
@@ -78,6 +78,7 @@ class ManuscriptRemoteDataSourceImpl implements ManuscriptDataSource {
             title: map['title'] as String,
             quote: map['quote'] as String,
             imageAsset: _getImageUrl(map['id'] as int),
+            audio: '$_baseUrl/_data/tts/$language/${map['id']}.mp3',
           );
         }).toList();
       }

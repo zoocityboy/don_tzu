@@ -46,7 +46,14 @@ flutter:
     - assets/images/
     - assets/backgrounds/
     - assets/sound/
-    - assets/tts/
+    - assets/tts/cs/
+    - assets/tts/de/
+    - assets/tts/en/
+    - assets/tts/hu/
+    - assets/tts/ja/
+    - assets/tts/pl/
+    - assets/tts/sk/
+    - assets/tts/zh/
     - assets/quotes/
 
 # Configuration for flutter_launcher_icons

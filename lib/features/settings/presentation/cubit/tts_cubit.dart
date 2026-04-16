@@ -6,43 +6,18 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TtsState {
-  final bool isPlaying;
-  final bool isMuted;
-  final bool isReady;
-  final String? currentChapterId;
-  final String? currentLanguage;
+  final dynamic file;
   final String? error;
 
-  const TtsState({
-    this.isPlaying = false,
-    this.isMuted = false,
-    this.isReady = true,
-    this.currentChapterId,
-    this.currentLanguage,
-    this.error,
-  });
+  const TtsState({this.file, this.error});
 
-  TtsState copyWith({
-    bool? isPlaying,
-    bool? isMuted,
-    bool? isReady,
-    String? currentChapterId,
-    String? currentLanguage,
-    String? error,
-  }) {
-    return TtsState(
-      isPlaying: isPlaying ?? this.isPlaying,
-      isMuted: isMuted ?? this.isMuted,
-      isReady: isReady ?? this.isReady,
-      currentChapterId: currentChapterId ?? this.currentChapterId,
-      currentLanguage: currentLanguage ?? this.currentLanguage,
-      error: error ?? this.error,
-    );
+  TtsState copyWith({dynamic file, String? error}) {
+    return TtsState(file: file ?? this.file, error: error ?? this.error);
   }
 
   @override
   String toString() {
-    return 'TtsState(isPlaying: $isPlaying, isMuted: $isMuted, isReady: $isReady, currentChapterId: $currentChapterId, currentLanguage: $currentLanguage, error: $error)';
+    return 'TtsState(file: $file, error: $error)';
   }
 }
 
@@ -53,11 +28,7 @@ class TtsCubit extends Cubit<TtsState> {
 
   TtsCubit({required SettingsLocalDataSource settingsStorage})
     : _settingsStorage = settingsStorage,
-      super(
-        TtsState(
-          isMuted: !settingsStorage.readSettings().ttsReaderEnabled,
-        ),
-      ) {
+      super(TtsState(file: null, error: null)) {
     _initPlayer();
     _settingsSubscription = _settingsStorage
         .watch(key: SettingsLocalDataSource.ttsReaderEnabledKey)
@@ -66,11 +37,20 @@ class TtsCubit extends Cubit<TtsState> {
         });
     _syncWithSettings();
   }
+  void _syncWithSettings() {
+    final isEnabled = _settingsStorage.readSettings().ttsReaderEnabled;
+    if (!isEnabled) {
+      _player.setVolume(0);
+      stop();
+    } else {
+      _player.setVolume(1);
+    }
+  }
 
   void _initPlayer() {
     _player.onPlayerComplete.listen((_) {
       AppLogger.debug('TTS playback completed');
-      emit(state.copyWith(isPlaying: false, currentChapterId: null));
+      emit(state.copyWith(file: null));
     });
 
     _player.onPlayerStateChanged.listen((state) {
@@ -82,101 +62,41 @@ class TtsCubit extends Cubit<TtsState> {
         AppLogger.debug('TTS stopped');
       } else if (state == PlayerState.completed) {
         AppLogger.debug('TTS completed');
-        emit(this.state.copyWith(isPlaying: false, currentChapterId: null));
       }
     });
 
     _player.onPlayerComplete.listen((_) {
       AppLogger.error('TTS player error');
-      emit(state.copyWith(isPlaying: false, error: 'Playback error'));
+      emit(state.copyWith(file: null, error: 'Playback error'));
     });
 
     AppLogger.info('TTS player initialized');
   }
 
-  bool isLanguageReady(String language) {
-    return true;
-  }
-
-  String? getFilePath(String chapterId, String language) {
-    return null;
-  }
-
-  Future<void> generateForLanguage(
-    String language,
-    List<dynamic> texts,
-  ) async {}
-
-  Future<void> speak(String text, String language) async {}
-
-  Future<void> play(String chapterId, String language) async {
+  Future<void> play(Source uri) async {
     if (!_settingsStorage.readSettings().ttsReaderEnabled) {
       AppLogger.info('TTS play ignored because the reader is disabled');
-    }
-  }
 
-  Future<void> playUrl(String url, String chapterId, String language) async {
-    AppLogger.info('TTS play URL requested: url=$url, chapterId=$chapterId');
-
-    if (!_settingsStorage.readSettings().ttsReaderEnabled) {
-      AppLogger.info('TTS play ignored because the reader is disabled');
       return;
     }
+    print('Playing TTS from: $uri');
 
-    try {
-      await stop();
-
-      await _player.play(UrlSource(url));
-
-      emit(
-        state.copyWith(
-          isPlaying: true,
-          currentChapterId: chapterId,
-          currentLanguage: language,
-        ),
-      );
-      AppLogger.info('TTS playback started for: $chapterId');
-    } catch (e) {
-      AppLogger.error('TTS play error for: $chapterId', e);
-      emit(state.copyWith(isPlaying: false, error: e.toString()));
-    }
+    _player.play(uri);
   }
 
   Future<void> stop() async {
     try {
       await _player.stop();
-      emit(state.copyWith(isPlaying: false, currentChapterId: null));
     } catch (_) {}
   }
 
   Future<void> pause() async {
     await _player.pause();
-    emit(state.copyWith(isPlaying: false));
   }
 
   Future<void> toggleMute({bool? enabled}) async {
-    final shouldMute = enabled ?? !state.isMuted;
+    final shouldMute = enabled ?? _player.volume == 0;
     await _settingsStorage.setTtsReaderEnabled(!shouldMute);
-  }
-
-  Future<void> _syncWithSettings() async {
-    final isEnabled = _settingsStorage.readSettings().ttsReaderEnabled;
-
-    await _player.setVolume(isEnabled ? 1 : 0);
-
-    if (!isEnabled && state.isPlaying) {
-      await _player.stop();
-    }
-
-    if (!isClosed) {
-      emit(
-        state.copyWith(
-          isMuted: !isEnabled,
-          isPlaying: isEnabled ? state.isPlaying : false,
-          currentChapterId: isEnabled ? state.currentChapterId : null,
-        ),
-      );
-    }
   }
 
   @override
